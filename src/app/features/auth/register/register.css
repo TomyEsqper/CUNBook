@@ -1,0 +1,79 @@
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px 24px 20px;
+  overflow: hidden;
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 6px 0 16px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.role-switch {
+  display: flex;
+  margin-bottom: 14px;
+  padding: 3px;
+  border: 2px solid var(--cun-green-soft);
+  border-radius: 999px;
+}
+
+.role-switch label {
+  flex: 1;
+  padding: 6px;
+  border-radius: 999px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.role-switch label.selected {
+  background: var(--cun-lime);
+  color: #10301a;
+}
+
+.role-switch input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row > .cun-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.form-error {
+  margin: 0 0 12px;
+  color: #c62828;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 480px) {
+  .row {
+    flex-direction: column;
+    gap: 0;
+  }
+}

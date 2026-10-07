@@ -1,0 +1,93 @@
+<h2 mat-dialog-title>{{ space ? 'Editar espacio' : 'Nuevo espacio' }}</h2>
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" />
+}
+<mat-dialog-content>
+  <form [formGroup]="form" id="spaceForm" (ngSubmit)="save()" class="form">
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre" />
+        @if (form.controls.nombre.invalid) {
+          <mat-error>El nombre es obligatorio.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          @for (t of tipos; track t) {
+            <mat-option [value]="t">{{ t }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline">
+        <mat-label>Capacidad máxima</mat-label>
+        <input matInput type="number" min="1" formControlName="capacidad" />
+        @if (form.controls.capacidad.invalid) {
+          <mat-error>Debe ser mayor que cero.</mat-error>
+        }
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Ubicación en el campus</mat-label>
+        <input matInput formControlName="ubicacion" />
+        @if (form.controls.ubicacion.invalid) {
+          <mat-error>La ubicación es obligatoria.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput rows="2" formControlName="descripcion"></textarea>
+      @if (form.controls.descripcion.invalid) {
+        <mat-error>La descripción es obligatoria.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Horario de funcionamiento (texto visible)</mat-label>
+      <input matInput formControlName="horarioFuncionamiento" placeholder="Lun-Vie 7:00-21:00" />
+      @if (form.controls.horarioFuncionamiento.invalid) {
+        <mat-error>Describe el horario general.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-slide-toggle formControlName="disponible">Disponible para reservas</mat-slide-toggle>
+
+    <h3>Horarios de disponibilidad</h3>
+    <div formArrayName="horarios" class="schedule">
+      @for (group of form.controls.horarios.controls; track $index) {
+        <div [formGroupName]="$index" class="schedule-row" [class.inactive]="!group.controls.activo.value">
+          <mat-checkbox formControlName="activo">{{ group.controls.diaSemana.value }}</mat-checkbox>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-select formControlName="horaInicio" aria-label="Hora inicio">
+              @for (s of slots; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-select formControlName="horaFin" aria-label="Hora fin">
+              @for (s of slots; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button">Cancelar</button>
+  <button mat-flat-button type="submit" form="spaceForm" [disabled]="saving()">
+    {{ space ? 'Guardar cambios' : 'Crear espacio' }}
+  </button>
+</mat-dialog-actions>

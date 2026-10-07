@@ -1,0 +1,82 @@
+<section class="cun-card auth-card">
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" class="loading" />
+  }
+
+  <h1>Registro de {{ rol() }}</h1>
+  <p class="subtitle">Crea tu cuenta para RESERVAS CUN</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (canChooseRole) {
+      <div class="role-switch" role="radiogroup" aria-label="Tipo de cuenta">
+        <label [class.selected]="rol() === 'Estudiante'">
+          <input type="radio" formControlName="rol" value="Estudiante" /> Estudiante
+        </label>
+        <label [class.selected]="rol() === 'Docente'">
+          <input type="radio" formControlName="rol" value="Docente" /> Docente
+        </label>
+      </div>
+    }
+
+    <div class="cun-field" [class.invalid]="invalid('nombre')">
+      <label for="nombre">Nombre Completo del {{ rol() }}</label>
+      <input id="nombre" formControlName="nombre" placeholder="ej. Juan Pérez" autocomplete="name" />
+      @if (invalid('nombre')) {
+        <span class="field-error">El nombre es obligatorio.</span>
+      }
+    </div>
+
+    <div class="cun-field" [class.invalid]="invalid('email')">
+      <label for="email">Correo Institucional (&#64;cun.edu.co)</label>
+      <input id="email" type="email" formControlName="email" placeholder="ej. juan.perez@cun.edu.co" autocomplete="email" />
+      @if (invalid('email')) {
+        <span class="field-error">Usa tu correo institucional &#64;cun.edu.co.</span>
+      }
+    </div>
+
+    <div class="row">
+      <div class="cun-field" [class.invalid]="invalid('telefono')">
+        <label for="telefono">Teléfono</label>
+        <input id="telefono" formControlName="telefono" placeholder="ej. 3001234567" autocomplete="tel" />
+        @if (invalid('telefono')) {
+          <span class="field-error">Teléfono no válido.</span>
+        }
+      </div>
+      <div class="cun-field" [class.invalid]="invalid('facultad')">
+        <label for="facultad">Facultad</label>
+        <input id="facultad" formControlName="facultad" placeholder="ej. Ingeniería de Sistemas" />
+        @if (invalid('facultad')) {
+          <span class="field-error">La facultad es obligatoria.</span>
+        }
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="cun-field" [class.invalid]="invalid('password')">
+        <label for="password">Contraseña</label>
+        <input id="password" type="password" formControlName="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+        @if (invalid('password')) {
+          <span class="field-error">Mínimo 6 caracteres.</span>
+        }
+      </div>
+      <div class="cun-field" [class.invalid]="invalid('confirmPassword') || (form.hasError('passwordMismatch') && form.controls.confirmPassword.touched)">
+        <label for="confirm">Confirmar contraseña</label>
+        <input id="confirm" type="password" formControlName="confirmPassword" placeholder="Repite la contraseña" autocomplete="new-password" />
+        @if (form.hasError('passwordMismatch') && form.controls.confirmPassword.touched) {
+          <span class="field-error">Las contraseñas no coinciden.</span>
+        } @else if (invalid('confirmPassword')) {
+          <span class="field-error">Confirma tu contraseña.</span>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="form-error">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn-lime btn-block" [disabled]="loading()">Registrarse</button>
+  </form>
+
+  <div class="or-divider">o</div>
+  <a class="btn-green btn-block" routerLink="/login">Ya tengo cuenta, iniciar sesión</a>
+</section>

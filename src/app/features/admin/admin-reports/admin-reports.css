@@ -1,0 +1,157 @@
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.kpi {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.kpi mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.kpi div {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi strong {
+  font: var(--mat-sys-headline-small);
+}
+
+.kpi span {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 170px 1fr 32px;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--mat-sys-surface-container-high);
+  overflow: hidden;
+  flex: 1;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--mat-sys-primary);
+}
+
+.bar-value {
+  text-align: right;
+  font-weight: 500;
+}
+
+.columns {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 200px;
+  padding-top: 16px;
+}
+
+.column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100%;
+  font: var(--mat-sys-label-small);
+}
+
+.column-bar {
+  width: 100%;
+  min-height: 4px;
+  border-radius: 4px 4px 0 0;
+  background: var(--mat-sys-tertiary);
+}
+
+.occupancy {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.occupancy th,
+.occupancy td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.occ {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.tab-card {
+  margin-top: 16px;
+}
+
+.search {
+  width: 100%;
+  max-width: 360px;
+  margin: 8px 0 12px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.table-scroll table {
+  width: 100%;
+  min-width: 720px;
+}
+
+.actions {
+  text-align: right;
+}
+
+.cancel {
+  color: var(--mat-sys-error);
+}
+
+.no-data {
+  padding: 24px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .charts {
+    grid-template-columns: 1fr;
+  }
+}

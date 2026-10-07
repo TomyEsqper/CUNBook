@@ -1,0 +1,20 @@
+<article class="cun-card card">
+  <mat-icon class="illustration">{{ icon() }}</mat-icon>
+  <h3>{{ space().nombre }}</h3>
+  <p class="description">{{ space().descripcion }}</p>
+
+  @if (detailed()) {
+    <ul class="meta">
+      <li><mat-icon>category</mat-icon>{{ space().tipo }}</li>
+      <li><mat-icon>place</mat-icon>{{ space().ubicacion }}</li>
+      <li><mat-icon>people</mat-icon>{{ space().capacidad }} personas</li>
+    </ul>
+  }
+
+  <div class="actions">
+    <a class="btn-muted btn-block" [routerLink]="['/spaces', space().id]">Verificar disponibilidad</a>
+    @if (detailed() && auth.canReserve()) {
+      <a class="reserve" routerLink="/reservations/new" [queryParams]="{ spaceId: space().id }">Reservar ahora</a>
+    }
+  </div>
+</article>

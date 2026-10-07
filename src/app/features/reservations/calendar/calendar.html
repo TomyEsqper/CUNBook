@@ -1,0 +1,86 @@
+<div [class.page]="!embedded()">
+  @if (!embedded()) {
+    <div class="page-header">
+      <div>
+        <h1>Calendario de disponibilidad</h1>
+        <p>Selecciona un espacio y haz clic en una franja libre para reservarla.</p>
+      </div>
+    </div>
+  }
+
+  <mat-card appearance="outlined">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <mat-card-content>
+      <div class="toolbar">
+        @if (!embedded()) {
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="space-select">
+            <mat-label>Espacio</mat-label>
+            <mat-select [ngModel]="selectedId()" (ngModelChange)="selectedId.set($event)">
+              @for (s of spaces(); track s.id) {
+                <mat-option [value]="s.id">{{ s.nombre }} ({{ s.tipo }})</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        }
+
+        <div class="week-nav">
+          <button mat-icon-button (click)="moveWeek(-1)" aria-label="Semana anterior">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button mat-stroked-button (click)="today()">Hoy</button>
+          <button mat-icon-button (click)="moveWeek(1)" aria-label="Semana siguiente">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+          <span class="range">
+            {{ days()[0].date | date: 'd MMM' }} - {{ days()[6].date | date: 'd MMM y' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><i class="dot free"></i> Disponible</span>
+        <span><i class="dot occupied"></i> Ocupado</span>
+        <span><i class="dot closed"></i> Cerrado</span>
+        <span><i class="dot past"></i> Ya pasó</span>
+      </div>
+
+      @if (space() && !space()!.disponible) {
+        <p class="warning"><mat-icon>block</mat-icon> Este espacio está desactivado y no recibe reservas.</p>
+      }
+
+      <div class="grid-scroll">
+        <table class="week-grid">
+          <thead>
+            <tr>
+              <th class="hour-col"></th>
+              @for (day of days(); track day.iso) {
+                <th [class.today]="isToday(day)">
+                  <div class="day-name">{{ day.date | date: 'EEE' }}</div>
+                  <div class="day-num">{{ day.date | date: 'd' }}</div>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (hora of hours; track hora) {
+              <tr>
+                <td class="hour-col">{{ hora }}</td>
+                @for (day of days(); track day.iso) {
+                  @let state = cell(day, hora);
+                  <td
+                    class="slot"
+                    [class]="state"
+                    [matTooltip]="label(state) + ' · ' + hora"
+                    (click)="reserve(day, hora)"
+                  ></td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

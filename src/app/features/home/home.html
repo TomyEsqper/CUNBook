@@ -1,0 +1,84 @@
+<div class="home splash-bg">
+  <h1 class="welcome">¡Bienvenido, {{ welcome() }} CUN!</h1>
+
+  @if (loading()) {
+    <div class="center"><mat-spinner diameter="48" /></div>
+  } @else {
+    <section class="spaces">
+      @for (space of featured(); track space.id) {
+        <app-space-card [space]="space" />
+      }
+    </section>
+    <div class="see-all">
+      <a routerLink="/spaces">Ver todos los espacios ({{ spaces().length }}) <mat-icon>arrow_forward</mat-icon></a>
+    </div>
+  }
+
+  <section class="panels">
+    <article class="cun-panel">
+      <header>
+        <h2>Notificaciones</h2>
+        @if (unread()) {
+          <span class="badge">{{ unread() }} nuevas</span>
+        }
+      </header>
+      @if (notifications().length) {
+        <ul class="notifications">
+          @for (n of sortedNotifications(); track n.id) {
+            <li [class.unread]="!n.leida" (click)="markAsRead(n)" [attr.title]="n.leida ? '' : 'Marcar como leída'">
+              <mat-icon class="type-{{ n.tipo }}">{{ icon(n) }}</mat-icon>
+              <div>
+                <p>{{ n.mensaje }}</p>
+                <small>{{ n.fechaEnvio | date: 'd MMM, h:mm a' }}</small>
+              </div>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="muted">No tienes notificaciones.</p>
+      }
+    </article>
+
+    @if (!auth.canReserve()) {
+      <article class="cun-panel">
+        <header>
+          <h2>Resumen de espacios</h2>
+          <a routerLink="/admin/spaces">Gestionar</a>
+        </header>
+        <ul class="stats">
+          <li><mat-icon>domain</mat-icon><p>Espacios registrados</p><strong>{{ allSpaces().length }}</strong></li>
+          <li><mat-icon>check_circle</mat-icon><p>Disponibles para reservas</p><strong>{{ spaces().length }}</strong></li>
+          <li><mat-icon>block</mat-icon><p>Desactivados</p><strong>{{ allSpaces().length - spaces().length }}</strong></li>
+          <li><mat-icon>people</mat-icon><p>Capacidad total</p><strong>{{ totalCapacity() }}</strong></li>
+        </ul>
+        <a class="btn-lime btn-block new" routerLink="/admin/spaces">Gestionar espacios</a>
+      </article>
+    } @else {
+      <article class="cun-panel">
+        <header>
+          <h2>Mis próximas reservas</h2>
+          <a routerLink="/reservations">Ver todas</a>
+        </header>
+        @if (upcoming().length) {
+          <ul class="upcoming">
+            @for (r of upcoming(); track r.id) {
+              <li>
+                <div class="date">
+                  <span>{{ fromIsoDate(r.fecha) | date: 'MMM' }}</span>
+                  <strong>{{ fromIsoDate(r.fecha) | date: 'd' }}</strong>
+                </div>
+                <div>
+                  <p>{{ r.space?.nombre }}</p>
+                  <small>{{ shortTime(r.horaInicio) }} - {{ shortTime(r.horaFin) }} · {{ r.space?.ubicacion }}</small>
+                </div>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="muted">No tienes reservas activas.</p>
+        }
+        <a class="btn-lime btn-block new" routerLink="/reservations/new">Nueva reserva</a>
+      </article>
+    }
+  </section>
+</div>

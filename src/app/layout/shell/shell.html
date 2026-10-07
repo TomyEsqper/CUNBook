@@ -1,0 +1,101 @@
+<header class="navbar">
+  <app-cun-logo />
+
+  <button class="hamburger" (click)="menuOpen.set(!menuOpen())" aria-label="Abrir menú">
+    <mat-icon>{{ menuOpen() ? 'close' : 'menu' }}</mat-icon>
+  </button>
+
+  <nav class="links" [class.open]="menuOpen()">
+    @for (item of topNav(); track item.link) {
+      <a
+        [routerLink]="item.link"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.link === '/reservations' }"
+        (click)="menuOpen.set(false)"
+      >
+        {{ item.label }}
+      </a>
+    }
+    @if (adminNav().length) {
+      <button class="admin-trigger" [matMenuTriggerFor]="adminMenu">
+        Administración <mat-icon>expand_more</mat-icon>
+      </button>
+    }
+  </nav>
+
+  <div class="user">
+    <button class="user-button" [matMenuTriggerFor]="userMenu" aria-label="Menú de usuario">
+      <span class="user-name">{{ firstName() }}</span>
+      <span class="avatar">{{ initials() }}</span>
+    </button>
+    <button class="btn-lime logout" (click)="auth.logout()">Cerrar sesión</button>
+  </div>
+</header>
+
+<mat-menu #adminMenu="matMenu">
+  @for (item of adminNav(); track item.link) {
+    <a mat-menu-item [routerLink]="item.link" (click)="menuOpen.set(false)">
+      <mat-icon>{{ item.icon }}</mat-icon>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+</mat-menu>
+
+<mat-menu #userMenu="matMenu" xPosition="before">
+  <div class="menu-header">
+    <strong>{{ auth.user()?.nombre }}</strong>
+    <small>{{ auth.user()?.email }}</small>
+    <small>{{ rolLabel() }}</small>
+  </div>
+  <mat-divider />
+  <a mat-menu-item routerLink="/profile">
+    <mat-icon>person</mat-icon>
+    <span>Mi perfil</span>
+  </a>
+  @if (useMocks) {
+    <button mat-menu-item (click)="resetDemo()">
+      <mat-icon>restart_alt</mat-icon>
+      <span>Reiniciar datos demo</span>
+    </button>
+  }
+  <button mat-menu-item (click)="auth.logout()">
+    <mat-icon>logout</mat-icon>
+    <span>Cerrar sesión</span>
+  </button>
+</mat-menu>
+
+<div class="body">
+  <aside class="sidebar">
+    @for (item of sideNav(); track item.link) {
+      <a
+        [routerLink]="item.link"
+        routerLinkActive="active"
+        [matTooltip]="item.label"
+        matTooltipPosition="right"
+        [attr.aria-label]="item.label"
+      >
+        <mat-icon>{{ item.icon }}</mat-icon>
+      </a>
+    }
+    @if (adminNav().length) {
+      <span class="separator"></span>
+      @for (item of adminNav(); track item.link) {
+        <a
+          [routerLink]="item.link"
+          routerLinkActive="active"
+          [matTooltip]="item.label"
+          matTooltipPosition="right"
+          [attr.aria-label]="item.label"
+        >
+          <mat-icon>{{ item.icon }}</mat-icon>
+        </a>
+      }
+    }
+  </aside>
+
+  <main class="content splash-bg splash-faint">
+    <router-outlet />
+  </main>
+</div>
+
+<app-site-footer />

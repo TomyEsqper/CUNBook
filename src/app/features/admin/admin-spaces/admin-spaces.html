@@ -1,0 +1,86 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Gestionar espacios</h1>
+      <p>Crea, edita y desactiva espacios, y configura sus horarios de disponibilidad.</p>
+    </div>
+    <button mat-flat-button (click)="create()">
+      <mat-icon>add</mat-icon>
+      Nuevo espacio
+    </button>
+  </div>
+
+  <mat-card appearance="outlined">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar espacio</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [ngModel]="search()" (ngModelChange)="search.set($event)" />
+      </mat-form-field>
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="filtered()">
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let s">
+              <a class="name" [routerLink]="['/spaces', s.id]">
+                <mat-icon>{{ spaceIcon(s.tipo, s.nombre) }}</mat-icon> {{ s.nombre }}
+              </a>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let s">{{ s.tipo }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="capacidad">
+            <th mat-header-cell *matHeaderCellDef>Capacidad</th>
+            <td mat-cell *matCellDef="let s">{{ s.capacidad }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="ubicacion">
+            <th mat-header-cell *matHeaderCellDef>Ubicación</th>
+            <td mat-cell *matCellDef="let s">{{ s.ubicacion }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let s">
+              <span class="status-chip" [class.status-Activa]="s.disponible" [class.status-Cancelada]="!s.disponible">
+                {{ s.disponible ? 'Disponible' : 'Desactivado' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let s" class="actions">
+              <button mat-icon-button matTooltip="Editar" (click)="edit(s)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (s.disponible) {
+                <button mat-icon-button matTooltip="Desactivar" (click)="deactivate(s)">
+                  <mat-icon>block</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button matTooltip="Reactivar" (click)="activate(s)">
+                  <mat-icon>check_circle</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns" [class.inactive]="!row.disponible"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="columns.length">No hay espacios que coincidan.</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

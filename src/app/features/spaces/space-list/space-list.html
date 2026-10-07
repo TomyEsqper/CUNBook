@@ -1,0 +1,67 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Espacios disponibles</h1>
+      <p>Busca salas de estudio, aulas, laboratorios y auditorios para reservar.</p>
+    </div>
+    @if (auth.canReserve()) {
+      <a class="btn-lime" routerLink="/reservations/new">
+        <mat-icon>add</mat-icon>
+        Nueva reserva
+      </a>
+    } @else {
+      <a class="btn-lime" routerLink="/admin/spaces">
+        <mat-icon>domain</mat-icon>
+        Gestionar espacios
+      </a>
+    }
+  </div>
+
+  <form [formGroup]="filters" class="filters">
+    <mat-form-field appearance="outline" class="search">
+      <mat-label>Buscar por nombre, ubicación o descripción</mat-label>
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput formControlName="search" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Tipo de espacio</mat-label>
+      <mat-select formControlName="tipo">
+        <mat-option value="">Todos</mat-option>
+        @for (tipo of tipos; track tipo) {
+          <mat-option [value]="tipo">{{ tipo }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Capacidad mínima</mat-label>
+      <input matInput type="number" min="1" formControlName="capacidadMin" />
+    </mat-form-field>
+  </form>
+
+  <mat-chip-listbox class="chips" aria-label="Filtrar por tipo">
+    @for (tipo of tipos; track tipo) {
+      <mat-chip-option [selected]="filters.controls.tipo.value === tipo" (click)="selectTipo(tipo)">
+        <mat-icon matChipAvatar>{{ spaceIcon(tipo) }}</mat-icon>
+        {{ tipo }}
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+
+  @if (loading()) {
+    <div class="center"><mat-spinner diameter="48" /></div>
+  } @else if (spaces().length === 0) {
+    <div class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <p>No se encontraron espacios con esos filtros.</p>
+      <button mat-stroked-button (click)="clear()">Limpiar filtros</button>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (space of spaces(); track space.id) {
+        <app-space-card [space]="space" [detailed]="true" />
+      }
+    </div>
+  }
+</div>

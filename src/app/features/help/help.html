@@ -1,0 +1,31 @@
+<section class="help">
+  <div class="cun-card intro">
+    <mat-icon>support_agent</mat-icon>
+    <div>
+      <h1>Centro de ayuda</h1>
+      <p>Resolvemos las dudas más comunes sobre RESERVAS CUN.</p>
+    </div>
+  </div>
+
+  <mat-accordion class="faqs">
+    @for (faq of faqs; track faq.question) {
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ faq.question }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <p>{{ faq.answer }}</p>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+  <div class="contact">
+    <p>¿Necesitas más ayuda? Escríbenos a <a href="mailto:reservas@cun.edu.co">reservas&#64;cun.edu.co</a></p>
+    @if (!auth.isLoggedIn()) {
+      <a class="btn-lime" routerLink="/login">Iniciar sesión</a>
+    } @else if (auth.canReserve()) {
+      <a class="btn-lime" routerLink="/reservations/new">Hacer una reserva</a>
+    } @else {
+      <a class="btn-lime" routerLink="/admin/spaces">Gestionar espacios</a>
+    }
+  </div>
+</section>

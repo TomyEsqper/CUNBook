@@ -1,0 +1,32 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+}
+
+h3 {
+  margin: 20px 0 8px;
+  font: var(--mat-sys-title-small);
+}
+
+.schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.schedule-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.schedule-row.inactive mat-form-field {
+  opacity: 0.4;
+}
+
+.error {
+  color: var(--mat-sys-error);
+}

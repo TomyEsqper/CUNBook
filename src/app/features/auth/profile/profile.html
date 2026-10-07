@@ -1,0 +1,66 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Mi perfil</h1>
+      <p>Gestiona tus datos personales.</p>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <mat-card appearance="outlined">
+      <mat-card-content class="summary">
+        <mat-icon class="big-icon">account_circle</mat-icon>
+        <h2>{{ auth.user()?.nombre }}</h2>
+        <p class="muted">{{ auth.user()?.email }}</p>
+        <p><strong>Rol:</strong> {{ rolLabel() }}</p>
+        <p class="muted">Registrado el {{ auth.user()?.fechaRegistro | date: 'longDate' }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined">
+      @if (loading()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+      <mat-card-header>
+        <mat-card-title>Datos personales</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre completo</mat-label>
+            <input matInput formControlName="nombre" />
+            @if (form.controls.nombre.invalid) {
+              <mat-error>El nombre es obligatorio.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Correo</mat-label>
+            <input matInput [value]="auth.user()?.email ?? ''" disabled />
+            <mat-hint>El correo no se puede cambiar.</mat-hint>
+          </mat-form-field>
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="telefono" />
+              @if (form.controls.telefono.invalid) {
+                <mat-error>Teléfono no válido.</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Facultad o departamento</mat-label>
+              <input matInput formControlName="facultad" />
+              @if (form.controls.facultad.invalid) {
+                <mat-error>La facultad es obligatoria.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+          <div class="actions">
+            <button mat-flat-button type="submit" [disabled]="loading() || form.pristine">
+              Guardar cambios
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

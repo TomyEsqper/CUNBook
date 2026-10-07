@@ -1,0 +1,91 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Mis reservas</h1>
+      <p>Puedes modificar o cancelar una reserva hasta una hora antes de su inicio.</p>
+    </div>
+    <a mat-flat-button routerLink="/reservations/new">
+      <mat-icon>add</mat-icon>
+      Nueva reserva
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="center"><mat-spinner diameter="48" /></div>
+  } @else {
+    <mat-tab-group animationDuration="150ms">
+      <mat-tab label="Activas ({{ activas().length }}/{{ maxActivas }})">
+        <ng-template matTabContent>
+          @if (activas().length === 0) {
+            <div class="empty-state">
+              <mat-icon>event_available</mat-icon>
+              <p>No tienes reservas activas.</p>
+              <a mat-stroked-button routerLink="/spaces">Buscar espacios</a>
+            </div>
+          } @else {
+            <div class="list">
+              @for (r of activas(); track r.id) {
+                <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
+              }
+            </div>
+          }
+        </ng-template>
+      </mat-tab>
+
+      <mat-tab label="Historial ({{ historial().length }})">
+        <ng-template matTabContent>
+          @if (historial().length === 0) {
+            <div class="empty-state">
+              <mat-icon>history</mat-icon>
+              <p>Aún no tienes reservas pasadas o canceladas.</p>
+            </div>
+          } @else {
+            <div class="list">
+              @for (r of historial(); track r.id) {
+                <ng-container *ngTemplateOutlet="card; context: { $implicit: r }" />
+              }
+            </div>
+          }
+        </ng-template>
+      </mat-tab>
+    </mat-tab-group>
+  }
+</div>
+
+<ng-template #card let-r>
+  <mat-card appearance="outlined" class="reservation">
+    <div class="date-box">
+      <span class="month">{{ fromIsoDate(r.fecha) | date: 'MMM' }}</span>
+      <span class="day">{{ fromIsoDate(r.fecha) | date: 'd' }}</span>
+      <span class="weekday">{{ fromIsoDate(r.fecha) | date: 'EEE' }}</span>
+    </div>
+    <div class="body">
+      <div class="title-row">
+        <h3>
+          <mat-icon>{{ spaceIcon(r.space?.tipo ?? '', r.space?.nombre ?? '') }}</mat-icon>
+          {{ r.space?.nombre ?? 'Espacio #' + r.spaceId }}
+        </h3>
+        <span class="status-chip status-{{ r.estado }}">{{ r.estado }}</span>
+      </div>
+      <p class="muted">
+        <mat-icon>schedule</mat-icon> {{ shortTime(r.horaInicio) }} - {{ shortTime(r.horaFin) }}
+        <mat-icon>place</mat-icon> {{ r.space?.ubicacion }}
+      </p>
+      <p class="code">Reserva #{{ r.id }} · creada {{ r.fechaCreacion | date: 'short' }}</p>
+    </div>
+    @if (r.estado === 'Activa') {
+      <div class="actions">
+        <span [matTooltip]="canChange(r) ? '' : 'Ya no se puede modificar: falta menos de una hora.'">
+          <a mat-stroked-button [routerLink]="['/reservations', r.id, 'edit']" [disabled]="!canChange(r)">
+            <mat-icon>edit</mat-icon> Modificar
+          </a>
+        </span>
+        <span [matTooltip]="canChange(r) ? '' : 'Ya no se puede cancelar: falta menos de una hora.'">
+          <button mat-button class="cancel" (click)="cancel(r)" [disabled]="!canChange(r)">
+            <mat-icon>close</mat-icon> Cancelar
+          </button>
+        </span>
+      </div>
+    }
+  </mat-card>
+</ng-template>

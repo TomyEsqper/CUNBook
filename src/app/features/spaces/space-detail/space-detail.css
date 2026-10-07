@@ -1,0 +1,58 @@
+.back {
+  margin-bottom: 8px;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.type-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--mat-sys-primary);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info mat-icon {
+  color: var(--mat-sys-primary);
+}
+
+.schedule {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+}
+
+.schedule td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.schedule td:last-child {
+  text-align: right;
+}
+
+.section-title {
+  margin: 28px 0 12px;
+  font: var(--mat-sys-title-large);
+}
+
+@media (max-width: 800px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

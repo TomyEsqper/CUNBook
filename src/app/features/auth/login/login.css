@@ -1,0 +1,103 @@
+.auth-card {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 24px 24px 20px;
+  overflow: hidden;
+}
+
+.loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+h1 {
+  margin: 0;
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  margin: 6px 0 18px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.password {
+  position: relative;
+}
+
+.password input {
+  padding-right: 40px;
+}
+
+.eye {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: flex;
+  padding: 2px;
+  border: none;
+  background: none;
+  color: #7a8790;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.eye mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.forgot {
+  align-self: flex-end;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--cun-navy);
+  font: 0.75rem Montserrat, sans-serif;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  color: #c62828;
+  font-size: 0.85rem;
+}
+
+.demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #c9d1d8;
+  font-size: 0.75rem;
+  color: #6b7680;
+}
+
+.demo span {
+  width: 100%;
+  text-align: center;
+}
+
+.demo button {
+  padding: 3px 10px;
+  border: 1px solid var(--cun-green-soft);
+  border-radius: 999px;
+  background: #f4fbef;
+  color: var(--cun-green);
+  font: 600 0.72rem Montserrat, sans-serif;
+  cursor: pointer;
+}

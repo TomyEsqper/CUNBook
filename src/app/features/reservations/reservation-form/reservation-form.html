@@ -1,0 +1,144 @@
+<div class="page">
+  <a mat-button routerLink="/reservations" class="back"><mat-icon>arrow_back</mat-icon> Mis reservas</a>
+
+  <div class="page-header">
+    <div>
+      <h1>{{ isEdit() ? 'Modificar reserva #' + (reservation()?.id ?? '') : 'Nueva reserva' }}</h1>
+      <p>
+        {{ isEdit() ? 'Cambia la fecha u hora de tu reserva.' : 'Selecciona el espacio, la fecha y la franja horaria.' }}
+      </p>
+    </div>
+  </div>
+
+  <div class="layout">
+    <mat-card appearance="outlined">
+      @if (loading() || saving()) {
+        <mat-progress-bar mode="indeterminate" />
+      }
+      <mat-card-content>
+        @if (!canEdit()) {
+          <p class="alert"><mat-icon>info</mat-icon> Solo se pueden modificar reservas activas.</p>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" class="form">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Espacio</mat-label>
+            <mat-select formControlName="spaceId">
+              @for (s of spaces(); track s.id) {
+                <mat-option [value]="s.id">
+                  <mat-icon>{{ spaceIcon(s.tipo, s.nombre) }}</mat-icon>
+                  {{ s.nombre }} · {{ s.tipo }} ({{ s.capacidad }} pers.)
+                </mat-option>
+              }
+            </mat-select>
+            @if (form.controls.spaceId.hasError('required')) {
+              <mat-error>El espacio es obligatorio.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="picker" [min]="minDate" formControlName="fecha" readonly (click)="picker.open()" />
+            <mat-datepicker-toggle matIconSuffix [for]="picker" />
+            <mat-datepicker #picker />
+            @if (form.controls.fecha.hasError('required')) {
+              <mat-error>La fecha de la reserva es obligatoria.</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de inicio</mat-label>
+              <mat-select formControlName="horaInicio">
+                @for (slot of slots; track slot) {
+                  <mat-option [value]="slot">{{ slot }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.horaInicio.hasError('required')) {
+                <mat-error>Selecciona la hora de inicio.</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Hora de fin</mat-label>
+              <mat-select formControlName="horaFin">
+                @for (slot of endSlots(); track slot) {
+                  <mat-option [value]="slot">{{ slot }}</mat-option>
+                }
+              </mat-select>
+              @if (form.controls.horaFin.hasError('required')) {
+                <mat-error>Selecciona la hora de fin.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          @if (warnings().length) {
+            <ul class="warnings">
+              @for (w of warnings(); track w) {
+                <li><mat-icon>warning</mat-icon> {{ w }}</li>
+              }
+            </ul>
+          }
+          @if (serverError()) {
+            <p class="alert error"><mat-icon>error</mat-icon> {{ serverError() }}</p>
+          }
+
+          <div class="actions">
+            <a mat-button routerLink="/reservations">Cancelar</a>
+            <button mat-flat-button type="submit" [disabled]="saving() || !canEdit() || warnings().length > 0">
+              {{ isEdit() ? 'Guardar cambios' : 'Confirmar reserva' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="side">
+      <mat-card-header>
+        <mat-card-title>Disponibilidad del día</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (selectedSpace(); as space) {
+          <p class="space-name"><mat-icon>{{ spaceIcon(space.tipo, space.nombre) }}</mat-icon> {{ space.nombre }}</p>
+          <p class="muted">{{ space.ubicacion }} · {{ space.capacidad }} personas</p>
+
+          @if (todaySchedule(); as today) {
+            @if (today.horario) {
+              <p>
+                <strong>{{ today.dia }}:</strong>
+                abre {{ shortTime(today.horario.horaInicio) }} - {{ shortTime(today.horario.horaFin) }}
+              </p>
+
+              <h3>Ocupado</h3>
+              @if (occupiedOthers().length) {
+                <ul class="slots">
+                  @for (o of occupiedOthers(); track o.reservationId) {
+                    <li class="busy">{{ shortTime(o.horaInicio) }} - {{ shortTime(o.horaFin) }}</li>
+                  }
+                </ul>
+              } @else {
+                <p class="muted">Sin reservas este día.</p>
+              }
+
+              <h3>Franjas libres</h3>
+              <ul class="slots">
+                @for (f of freeSlots(); track f.inicio) {
+                  <li>
+                    <button mat-stroked-button type="button" (click)="pickFreeSlot(f.inicio, f.fin)" [disabled]="!canEdit()">
+                      {{ shortTime(f.inicio) }} - {{ shortTime(f.fin) }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="alert"><mat-icon>event_busy</mat-icon> El espacio no abre el {{ today.dia }}.</p>
+            }
+          } @else {
+            <p class="muted">Selecciona una fecha para ver la disponibilidad.</p>
+          }
+        } @else {
+          <p class="muted">Selecciona un espacio para ver su disponibilidad.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

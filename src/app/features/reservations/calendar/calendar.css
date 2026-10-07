@@ -1,0 +1,115 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 12px;
+}
+
+.space-select {
+  min-width: 280px;
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.range {
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 12px;
+  font: var(--mat-sys-body-small);
+}
+
+.legend span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.warning {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mat-sys-error);
+}
+
+.grid-scroll {
+  overflow-x: auto;
+}
+
+.week-grid {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 3px;
+}
+
+.week-grid th {
+  font-weight: 500;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.week-grid th.today {
+  background: var(--cun-lime);
+  color: #10301a;
+}
+
+.day-name {
+  font: var(--mat-sys-label-small);
+  text-transform: uppercase;
+}
+
+.day-num {
+  font: var(--mat-sys-title-medium);
+}
+
+.hour-col {
+  width: 56px;
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+  text-align: right;
+  padding-right: 6px;
+}
+
+.slot {
+  height: 30px;
+  border-radius: 4px;
+}
+
+.free {
+  background: #cdeed6;
+  cursor: pointer;
+}
+
+.slot.free:hover {
+  background: #8fd6a3;
+}
+
+.occupied {
+  background: #f6b9b4;
+}
+
+.closed {
+  background: var(--mat-sys-surface-container-highest);
+}
+
+.past {
+  background: repeating-linear-gradient(45deg, #eceff3, #eceff3 4px, #dfe3e8 4px, #dfe3e8 8px);
+}

@@ -1,0 +1,44 @@
+.profile-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) 2fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.summary {
+  text-align: center;
+  padding-top: 16px;
+}
+
+.summary h2 {
+  margin: 8px 0 4px;
+}
+
+.summary p {
+  margin: 4px 0;
+}
+
+.big-icon {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  color: var(--mat-sys-primary);
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 800px) {
+  .profile-grid {
+    grid-template-columns: 1fr;
+  }
+}

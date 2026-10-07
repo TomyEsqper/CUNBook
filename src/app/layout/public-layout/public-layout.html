@@ -1,0 +1,15 @@
+<header class="navbar">
+  <app-cun-logo />
+  <nav class="links">
+    <a routerLink="/login" routerLinkActive="active">Inicio</a>
+    <a routerLink="/spaces">Espacios</a>
+    <a routerLink="/ayuda" routerLinkActive="active">Ayuda</a>
+    <a class="btn-lime cta" [routerLink]="cta().link">{{ cta().label }}</a>
+  </nav>
+</header>
+
+<main class="content splash-bg">
+  <router-outlet />
+</main>
+
+<app-site-footer />

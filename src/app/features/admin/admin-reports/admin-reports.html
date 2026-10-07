@@ -1,0 +1,162 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Reportes y estadísticas</h1>
+      <p>Uso de los espacios, franjas de mayor demanda y reservas activas.</p>
+    </div>
+    <button mat-stroked-button (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      Actualizar
+    </button>
+  </div>
+
+  @if (loading()) {
+    <mat-progress-bar mode="indeterminate" />
+  }
+
+  <mat-tab-group animationDuration="150ms">
+    <mat-tab label="Estadísticas">
+      @if (report(); as r) {
+        <div class="kpis">
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>event</mat-icon>
+            <div><strong>{{ r.totalReservas }}</strong><span>Reservas totales</span></div>
+          </mat-card>
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>event_available</mat-icon>
+            <div><strong>{{ r.reservasActivas }}</strong><span>Activas</span></div>
+          </mat-card>
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>event_busy</mat-icon>
+            <div><strong>{{ r.reservasCanceladas }}</strong><span>Canceladas</span></div>
+          </mat-card>
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>percent</mat-icon>
+            <div><strong>{{ r.ocupacionPromedio }}%</strong><span>Ocupación promedio</span></div>
+          </mat-card>
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>schedule</mat-icon>
+            <div><strong>{{ horaPico()?.hora ?? '-' }}</strong><span>Hora pico</span></div>
+          </mat-card>
+          <mat-card appearance="outlined" class="kpi">
+            <mat-icon>group</mat-icon>
+            <div><strong>{{ r.totalUsuarios }}</strong><span>Usuarios</span></div>
+          </mat-card>
+        </div>
+
+        <div class="charts">
+          <mat-card appearance="outlined">
+            <mat-card-header><mat-card-title>Espacios más utilizados</mat-card-title></mat-card-header>
+            <mat-card-content>
+              @for (e of r.espacios; track e.spaceId) {
+                <div class="bar-row">
+                  <span class="bar-label" [matTooltip]="e.tipo">{{ e.nombre }}</span>
+                  <div class="bar-track">
+                    <div class="bar" [style.width.%]="(e.totalReservas / maxReservas()) * 100"></div>
+                  </div>
+                  <span class="bar-value">{{ e.totalReservas }}</span>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header><mat-card-title>Franjas horarias de mayor demanda</mat-card-title></mat-card-header>
+            <mat-card-content>
+              @if (r.demandaPorHora.length) {
+                <div class="columns">
+                  @for (d of r.demandaPorHora; track d.hora) {
+                    <div class="column" [matTooltip]="d.total + ' reservas'">
+                      <div class="column-bar" [style.height.%]="(d.total / maxDemanda()) * 100"></div>
+                      <span>{{ d.hora.slice(0, 2) }}</span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <p class="muted">Aún no hay datos.</p>
+              }
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined" class="wide">
+            <mat-card-header><mat-card-title>Tasa de ocupación por espacio</mat-card-title></mat-card-header>
+            <mat-card-content>
+              <table class="occupancy">
+                <tr>
+                  <th>Espacio</th>
+                  <th>Reservas</th>
+                  <th>Horas reservadas</th>
+                  <th>Ocupación</th>
+                </tr>
+                @for (e of r.espacios; track e.spaceId) {
+                  <tr>
+                    <td>{{ e.nombre }}</td>
+                    <td>{{ e.totalReservas }}</td>
+                    <td>{{ e.horasReservadas }} h</td>
+                    <td class="occ">
+                      <div class="bar-track"><div class="bar" [style.width.%]="e.ocupacion"></div></div>
+                      <span>{{ e.ocupacion }}%</span>
+                    </td>
+                  </tr>
+                }
+              </table>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </mat-tab>
+
+    <mat-tab label="Reservas activas ({{ activas().length }})">
+      <mat-card appearance="outlined" class="tab-card">
+        <mat-card-content>
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+            <mat-label>Buscar por espacio o usuario</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput [ngModel]="search()" (ngModelChange)="search.set($event)" />
+          </mat-form-field>
+
+          <div class="table-scroll">
+            <table mat-table [dataSource]="activas()">
+              <ng-container matColumnDef="id">
+                <th mat-header-cell *matHeaderCellDef>#</th>
+                <td mat-cell *matCellDef="let r">{{ r.id }}</td>
+              </ng-container>
+              <ng-container matColumnDef="espacio">
+                <th mat-header-cell *matHeaderCellDef>Espacio</th>
+                <td mat-cell *matCellDef="let r">{{ r.space?.nombre }}</td>
+              </ng-container>
+              <ng-container matColumnDef="usuario">
+                <th mat-header-cell *matHeaderCellDef>Usuario</th>
+                <td mat-cell *matCellDef="let r">
+                  {{ r.user?.nombre }}<br /><small class="muted">{{ r.user?.email }}</small>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                <td mat-cell *matCellDef="let r">{{ fromIsoDate(r.fecha) | date: 'EEE d MMM' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="horario">
+                <th mat-header-cell *matHeaderCellDef>Horario</th>
+                <td mat-cell *matCellDef="let r">{{ shortTime(r.horaInicio) }} - {{ shortTime(r.horaFin) }}</td>
+              </ng-container>
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef></th>
+                <td mat-cell *matCellDef="let r" class="actions">
+                  <button mat-button class="cancel" (click)="cancel(r)">
+                    <mat-icon>close</mat-icon> Cancelar
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="columns"></tr>
+              <tr mat-row *matRowDef="let row; columns: columns"></tr>
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell no-data" [attr.colspan]="columns.length">No hay reservas activas.</td>
+              </tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-tab>
+  </mat-tab-group>
+</div>

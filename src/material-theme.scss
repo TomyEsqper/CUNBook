@@ -1,0 +1,56 @@
+// Tema Angular Material con los colores institucionales de RESERVAS CUN.
+@use '@angular/material' as mat;
+
+html {
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$green-palette,
+        tertiary: mat.$chartreuse-palette,
+      ),
+      typography: Montserrat,
+      density: 0,
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-color: #8fce00,
+      filled-label-text-color: #10301a,
+      filled-container-shape: 999px,
+      outlined-container-shape: 999px,
+      outlined-outline-color: #1f6b3d,
+      outlined-label-text-color: #1f6b3d,
+      text-container-shape: 999px,
+      protected-container-shape: 999px,
+    )
+  );
+
+  @include mat.card-overrides(
+    (
+      outlined-container-color: #ffffff,
+      outlined-outline-color: #1f6b3d,
+      outlined-outline-width: 2px,
+      outlined-container-shape: 14px,
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      outlined-outline-color: #a8d892,
+      outlined-hover-outline-color: #6fb24f,
+      outlined-focus-outline-color: #1f6b3d,
+      outlined-container-shape: 8px,
+    )
+  );
+}
+
+body {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+}

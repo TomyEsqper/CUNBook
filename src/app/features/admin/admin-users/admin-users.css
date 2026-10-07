@@ -1,0 +1,29 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 8px 0 12px;
+}
+
+.filters mat-form-field {
+  flex: 1 1 240px;
+  max-width: 360px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 760px;
+}
+
+.role-select {
+  width: 230px;
+}
+
+.no-data {
+  padding: 24px;
+  text-align: center;
+}

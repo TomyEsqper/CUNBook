@@ -1,0 +1,53 @@
+.help {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+.intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 18px 20px;
+}
+
+.intro mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--cun-green);
+}
+
+.intro h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.intro p {
+  margin: 4px 0 0;
+}
+
+.faqs p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 6px 18px rgb(20 50 30 / 12%);
+}
+
+.contact p {
+  margin: 0;
+}

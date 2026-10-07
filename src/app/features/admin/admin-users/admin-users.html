@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1>Usuarios</h1>
+      <p>Gestiona los usuarios y asigna administradores de espacios.</p>
+    </div>
+  </div>
+
+  <mat-card appearance="outlined">
+    @if (loading()) {
+      <mat-progress-bar mode="indeterminate" />
+    }
+    <mat-card-content>
+      <div class="filters">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Buscar por nombre o correo</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [ngModel]="search()" (ngModelChange)="search.set($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Rol</mat-label>
+          <mat-select [ngModel]="rolFilter()" (ngModelChange)="rolFilter.set($event)">
+            <mat-option value="">Todos</mat-option>
+            @for (r of roles; track r.value) {
+              <mat-option [value]="r.value">{{ r.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="filtered()">
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let u">{{ u.nombre }}</td>
+          </ng-container>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Correo</th>
+            <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+          </ng-container>
+          <ng-container matColumnDef="facultad">
+            <th mat-header-cell *matHeaderCellDef>Facultad</th>
+            <td mat-cell *matCellDef="let u">{{ u.facultad }}</td>
+          </ng-container>
+          <ng-container matColumnDef="fechaRegistro">
+            <th mat-header-cell *matHeaderCellDef>Registro</th>
+            <td mat-cell *matCellDef="let u">{{ u.fechaRegistro | date: 'mediumDate' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="rol">
+            <th mat-header-cell *matHeaderCellDef>Rol</th>
+            <td mat-cell *matCellDef="let u">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="role-select">
+                <mat-select
+                  [value]="u.rol"
+                  (selectionChange)="changeRole(u, $event.value)"
+                  [disabled]="u.id === auth.user()?.id"
+                  aria-label="Rol del usuario"
+                >
+                  @for (r of roles; track r.value) {
+                    <mat-option [value]="r.value">{{ r.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell no-data" [attr.colspan]="columns.length">No hay usuarios que coincidan.</td>
+          </tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

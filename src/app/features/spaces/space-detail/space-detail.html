@@ -1,0 +1,74 @@
+<div class="page">
+  <a mat-button routerLink="/spaces" class="back"><mat-icon>arrow_back</mat-icon> Volver a espacios</a>
+
+  @if (loading()) {
+    <div class="center"><mat-spinner diameter="48" /></div>
+  } @else if (space(); as s) {
+    <div class="page-header">
+      <div class="title">
+        <mat-icon class="type-icon">{{ spaceIcon(s.tipo, s.nombre) }}</mat-icon>
+        <div>
+          <h1>{{ s.nombre }}</h1>
+          <p>{{ s.tipo }} · {{ s.ubicacion }}</p>
+        </div>
+      </div>
+      @if (!auth.canReserve()) {
+        <a mat-flat-button routerLink="/admin/spaces">
+          <mat-icon>domain</mat-icon>
+          Gestionar espacios
+        </a>
+      } @else if (s.disponible) {
+        <a mat-flat-button routerLink="/reservations/new" [queryParams]="{ spaceId: s.id }">
+          <mat-icon>event_available</mat-icon>
+          Reservar este espacio
+        </a>
+      }
+    </div>
+
+    <div class="info-grid">
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Información</mat-card-title></mat-card-header>
+        <mat-card-content class="info">
+          <p>{{ s.descripcion }}</p>
+          <p><mat-icon>people</mat-icon> Capacidad máxima: <strong>{{ s.capacidad }}</strong> personas</p>
+          <p><mat-icon>place</mat-icon> {{ s.ubicacion }}</p>
+          <p><mat-icon>schedule</mat-icon> {{ s.horarioFuncionamiento }}</p>
+          <p>
+            <mat-icon>{{ s.disponible ? 'check_circle' : 'block' }}</mat-icon>
+            {{ s.disponible ? 'Disponible para reservas' : 'Desactivado temporalmente' }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-header><mat-card-title>Horario semanal</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <table class="schedule">
+            @for (row of horarios(); track row.dia) {
+              <tr>
+                <td>{{ row.dia }}</td>
+                <td>
+                  @if (row.horario?.estaDisponible) {
+                    {{ shortTime(row.horario!.horaInicio) }} - {{ shortTime(row.horario!.horaFin) }}
+                  } @else {
+                    <span class="muted">Cerrado</span>
+                  }
+                </td>
+              </tr>
+            }
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    @if (auth.canReserve()) {
+      <h2 class="section-title">Disponibilidad</h2>
+      <app-calendar [spaceId]="s.id" [embedded]="true" />
+    }
+  } @else {
+    <div class="empty-state">
+      <mat-icon>help_outline</mat-icon>
+      <p>No se encontró el espacio.</p>
+    </div>
+  }
+</div>
