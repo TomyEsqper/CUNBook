@@ -24,3 +24,6 @@ export interface ReservationRequest {
 }
 
 export const MAX_RESERVAS_ACTIVAS = 3;
+
+/** Duracion maxima de una reserva, en horas. */
+export const MAX_HORAS_RESERVA = 3;

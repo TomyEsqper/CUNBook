@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, input, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,7 +12,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 import { getErrorMessage } from '../../../core/models/api-error';
-import { Reservation } from '../../../core/models/reservation';
+import { MAX_HORAS_RESERVA, Reservation } from '../../../core/models/reservation';
 import { OccupiedSlot, Space } from '../../../core/models/space';
 import { NotifyService } from '../../../core/services/notify';
 import { ReservationService } from '../../../core/services/reservation';
@@ -21,13 +21,18 @@ import {
   combineDateTime,
   dayOfWeek,
   fromIsoDate,
+  minutesToTime,
   overlaps,
   shortTime,
-  timeSlots,
   timeToMinutes,
   toIsoDate,
 } from '../../../core/utils/date-utils';
 import { spaceIcon } from '../../../core/utils/space-icons';
+
+const STEP_MIN = 30;
+const MAX_MIN = MAX_HORAS_RESERVA * 60;
+/** Tamaño de las franjas libres sugeridas. */
+const SUGGESTED_MIN = 60;
 
 @Component({
   selector: 'app-reservation-form',
@@ -70,8 +75,10 @@ export class ReservationForm implements OnInit {
   protected readonly serverError = signal<string | null>(null);
 
   protected readonly minDate = new Date();
-  protected readonly slots = timeSlots('06:00', '22:00');
+  protected readonly maxHoras = MAX_HORAS_RESERVA;
   protected readonly shortTime = shortTime;
+  /** Se refresca cada minuto para que las horas ya pasadas desaparezcan de las opciones. */
+  private readonly now = signal(new Date());
   protected readonly spaceIcon = spaceIcon;
 
   protected readonly form = inject(FormBuilder).group({
@@ -82,7 +89,7 @@ export class ReservationForm implements OnInit {
   });
 
   /** Incluye controles deshabilitados (el espacio queda bloqueado al editar). */
-  private readonly value = toSignal(
+  protected readonly value = toSignal(
     this.form.valueChanges.pipe(
       map(() => this.form.getRawValue()),
       startWith(this.form.getRawValue()),
@@ -90,9 +97,65 @@ export class ReservationForm implements OnInit {
     { initialValue: this.form.getRawValue() },
   );
 
+  /**
+   * Ventana reservable del dia elegido en minutos: horario del espacio y, si es hoy,
+   * desde la siguiente media hora despues de la hora actual.
+   */
+  private readonly window = computed(() => {
+    const fecha = this.value().fecha;
+    const horario = this.todaySchedule()?.horario;
+    if (!fecha || !horario) {
+      return null;
+    }
+    let open = timeToMinutes(horario.horaInicio);
+    const close = timeToMinutes(horario.horaFin);
+    const now = this.now();
+    if (toIsoDate(fecha) === toIsoDate(now)) {
+      const current = now.getHours() * 60 + now.getMinutes();
+      open = Math.max(open, Math.floor(current / STEP_MIN) * STEP_MIN + STEP_MIN);
+    }
+    return open < close ? { open, close } : null;
+  });
+
+  private readonly busy = computed(() =>
+    this.occupiedOthers()
+      .map((o) => ({ start: timeToMinutes(o.horaInicio), end: timeToMinutes(o.horaFin) }))
+      .sort((a, b) => a.start - b.start),
+  );
+
+  /** Horas originales de la reserva editada, para que sigan apareciendo como opcion. */
+  private readonly original = computed(() => {
+    const r = this.reservation();
+    return r ? { inicio: shortTime(r.horaInicio), fin: shortTime(r.horaFin) } : null;
+  });
+
+  protected readonly startSlots = computed(() => {
+    const window = this.window();
+    const slots: string[] = [];
+    if (window) {
+      for (let t = window.open; t + STEP_MIN <= window.close; t += STEP_MIN) {
+        if (!this.busy().some((b) => t >= b.start && t < b.end)) {
+          slots.push(minutesToTime(t));
+        }
+      }
+    }
+    return withValue(slots, this.original()?.inicio);
+  });
+
+  /** Desde la hora de inicio hasta el cierre, la siguiente reserva o el maximo de horas. */
   protected readonly endSlots = computed(() => {
     const inicio = this.value().horaInicio;
-    return inicio ? this.slots.filter((s) => timeToMinutes(s) > timeToMinutes(inicio)) : this.slots;
+    const window = this.window();
+    const slots: string[] = [];
+    if (inicio && window) {
+      const start = timeToMinutes(inicio);
+      const nextBusy = this.busy().find((b) => b.start > start)?.start ?? Infinity;
+      const limit = Math.min(start + MAX_MIN, window.close, nextBusy);
+      for (let t = start + STEP_MIN; t <= limit; t += STEP_MIN) {
+        slots.push(minutesToTime(t));
+      }
+    }
+    return inicio === this.original()?.inicio ? withValue(slots, this.original()?.fin) : slots;
   });
 
   /** Validaciones del lado del cliente, espejo de las reglas del backend. */
@@ -106,6 +169,9 @@ export class ReservationForm implements OnInit {
     const iso = toIsoDate(fecha);
     if (timeToMinutes(horaFin) <= timeToMinutes(horaInicio)) {
       warnings.push('La hora de fin debe ser mayor que la hora de inicio.');
+    }
+    if (timeToMinutes(horaFin) - timeToMinutes(horaInicio) > MAX_MIN) {
+      warnings.push(`Una reserva puede durar máximo ${MAX_HORAS_RESERVA} horas.`);
     }
     if (combineDateTime(iso, horaInicio) <= new Date()) {
       warnings.push('No se puede reservar una fecha u hora que ya pasó.');
@@ -156,6 +222,19 @@ export class ReservationForm implements OnInit {
   protected readonly canEdit = computed(() => !this.isEdit() || this.reservation()?.estado === 'Activa');
 
   constructor() {
+    const timer = setInterval(() => this.now.set(new Date()), 60_000);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+
+    // Al cambiar espacio, fecha o inicio, se limpian las horas que dejaron de ser validas.
+    effect(() => {
+      const { horaInicio, horaFin } = this.value();
+      if (horaInicio && this.window() && !this.startSlots().includes(horaInicio)) {
+        this.form.patchValue({ horaInicio: '', horaFin: '' });
+      } else if (horaFin && horaInicio && this.window() && !this.endSlots().includes(horaFin)) {
+        this.form.patchValue({ horaFin: '' });
+      }
+    });
+
     this.spaceService
       .list()
       .pipe(takeUntilDestroyed())
@@ -234,24 +313,24 @@ export class ReservationForm implements OnInit {
     this.form.patchValue({ horaInicio: shortTime(inicio), horaFin: shortTime(fin) });
   }
 
+  /** Franjas libres de una hora (o menos si llega el cierre o una reserva), desde ahora hasta el cierre. */
   protected readonly freeSlots = computed(() => {
-    const schedule = this.todaySchedule()?.horario;
-    if (!schedule) {
-      return [];
-    }
-    const busy = [...this.occupiedOthers()].sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+    const window = this.window();
     const free: { inicio: string; fin: string }[] = [];
-    let cursor = schedule.horaInicio;
-    for (const o of busy) {
-      if (timeToMinutes(o.horaInicio) > timeToMinutes(cursor)) {
-        free.push({ inicio: cursor, fin: o.horaInicio });
-      }
-      if (timeToMinutes(o.horaFin) > timeToMinutes(cursor)) {
-        cursor = o.horaFin;
-      }
+    if (!window) {
+      return free;
     }
-    if (timeToMinutes(schedule.horaFin) > timeToMinutes(cursor)) {
-      free.push({ inicio: cursor, fin: schedule.horaFin });
+    let t = window.open;
+    while (t + STEP_MIN <= window.close) {
+      const current = this.busy().find((b) => t >= b.start && t < b.end);
+      if (current) {
+        t = Math.ceil(current.end / STEP_MIN) * STEP_MIN;
+        continue;
+      }
+      const nextBusy = this.busy().find((b) => b.start > t)?.start ?? Infinity;
+      const end = Math.min(t + SUGGESTED_MIN, window.close, nextBusy);
+      free.push({ inicio: minutesToTime(t), fin: minutesToTime(end) });
+      t = end;
     }
     return free;
   });
@@ -287,4 +366,8 @@ export class ReservationForm implements OnInit {
       },
     });
   }
+}
+
+function withValue(slots: string[], value: string | undefined): string[] {
+  return value && !slots.includes(value) ? [value, ...slots].sort() : slots;
 }

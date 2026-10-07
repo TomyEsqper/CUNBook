@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterLink } from '@angular/router';
-import { MAX_RESERVAS_ACTIVAS } from '../../core/models/reservation';
+import { MAX_HORAS_RESERVA, MAX_RESERVAS_ACTIVAS } from '../../core/models/reservation';
 import { AuthService } from '../../core/services/auth';
 
 interface Faq {
@@ -38,6 +38,10 @@ export class Help {
     {
       question: '¿Cuántas reservas puedo tener al tiempo?',
       answer: `Puedes tener hasta ${MAX_RESERVAS_ACTIVAS} reservas activas simultáneamente.`,
+    },
+    {
+      question: '¿Cuánto puede durar una reserva?',
+      answer: `Máximo ${MAX_HORAS_RESERVA} horas, en bloques de 30 minutos, dentro del horario de funcionamiento del espacio.`,
     },
     {
       question: '¿Recibiré recordatorios?',
