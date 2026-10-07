@@ -73,6 +73,9 @@
     @if (error()) {
       <p class="form-error">{{ error() }}</p>
     }
+    @if (slow()) {
+      <p class="wake-hint">El servidor se está iniciando, puede tardar hasta un minuto…</p>
+    }
 
     <button type="submit" class="btn-lime btn-block" [disabled]="loading()">Registrarse</button>
   </form>

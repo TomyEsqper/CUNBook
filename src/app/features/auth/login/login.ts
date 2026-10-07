@@ -8,6 +8,7 @@ import { DEMO_ACCOUNTS, DemoAccount } from '../../../core/mocks/mock-data';
 import { getErrorMessage } from '../../../core/models/api-error';
 import { AuthService } from '../../../core/services/auth';
 import { NotifyService } from '../../../core/services/notify';
+import { slowRequest } from '../../../core/utils/slow-request';
 
 /** Cuenta que crea el DbSeeder del backend. */
 const API_DEMO_ACCOUNTS: DemoAccount[] = [
@@ -31,6 +32,7 @@ export class Login {
 
   protected readonly demoAccounts = environment.useMocks ? DEMO_ACCOUNTS : API_DEMO_ACCOUNTS;
   protected readonly loading = signal(false);
+  protected readonly slow = slowRequest(this.loading);
   protected readonly error = signal<string | null>(null);
   protected readonly hidePassword = signal(true);
   protected readonly recoverMode = signal(false);

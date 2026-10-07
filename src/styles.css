@@ -228,6 +228,16 @@ mat-card {
   color: #c62828;
 }
 
+.wake-hint {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #eaf6e2;
+  color: var(--cun-green);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 .or-divider {
   display: flex;
   align-items: center;

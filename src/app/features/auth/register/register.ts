@@ -14,6 +14,7 @@ import { getErrorMessage } from '../../../core/models/api-error';
 import { Rol } from '../../../core/models/user';
 import { AuthService } from '../../../core/services/auth';
 import { NotifyService } from '../../../core/services/notify';
+import { slowRequest } from '../../../core/utils/slow-request';
 
 function passwordsMatch(group: AbstractControl): ValidationErrors | null {
   const password = group.get('password')?.value;
@@ -40,6 +41,7 @@ export class Register {
   /** La API registra a todos como Estudiante; el rol solo se elige en el modo mock. */
   protected readonly canChooseRole = environment.useMocks;
   protected readonly loading = signal(false);
+  protected readonly slow = slowRequest(this.loading);
   protected readonly error = signal<string | null>(null);
 
   protected readonly form = this.fb.nonNullable.group(

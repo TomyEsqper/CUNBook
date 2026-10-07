@@ -4,8 +4,9 @@ Plataforma de reserva de espacios universitarios. Este proyecto es solo el front
 
 ## Ejecutar
 
-1. Levantar el backend (por defecto en `http://localhost:5000`, Swagger en `/swagger`).
-2. Levantar el front:
+El front consume el backend desplegado en Render (`https://reservaespacios-z1av.onrender.com/api`). Está en el plan gratuito: si lleva un rato sin uso, el primer request tarda 30-50 segundos mientras despierta, y el login muestra un aviso.
+
+Para usar un backend local, cambia `apiUrl` a `http://localhost:5000/api` en `src/environments/environment.development.ts`.
 
 ```bash
 npm install
@@ -20,7 +21,7 @@ Cuenta creada por el backend: `admin@cun.edu.co` / `AdminCun2026*`. Las cuentas 
 
 En `src/environments/environment.development.ts` (y `environment.ts` para producción):
 
-- `apiUrl`: URL base de la API (`http://localhost:5000/api`).
+- `apiUrl`: URL base de la API (`https://reservaespacios-z1av.onrender.com/api`).
 - `useMocks`: `false` consume la API real; `true` simula el backend en el navegador (localStorage), útil para trabajar sin servidor. Cuentas mock: `estudiante@`, `docente@` y `admin@cun.edu.co`, contraseña `demo123`.
 
 El token JWT se envía automáticamente en `Authorization: Bearer <token>` (`core/interceptors/jwt-interceptor.ts`).

@@ -2,7 +2,9 @@
 
 Endpoints del backend [ReservaEspacios](https://github.com/juandsalcedo/ReservaEspacios) que consume este frontend.
 
-**URL base:** `http://localhost:5000/api`
+**URL base:** `https://reservaespacios-z1av.onrender.com/api` (backend en Render; en local, `http://localhost:5000/api`).
+
+El backend está en el plan gratuito de Render: si lleva un rato sin uso, el primer request tarda 30-50 segundos.
 
 ## Cómo usarlas en Postman
 
