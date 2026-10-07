@@ -51,6 +51,17 @@ Estas funciones solo están en el modo mock; con la API real se ocultan o muestr
 - Registro como Docente (el backend registra a todos como Estudiante).
 - Recuperar contraseña, notificaciones, reportes, listado de todas las reservas, cancelación administrativa, listado de usuarios y cambio de rol.
 
+## CI/CD y despliegue
+
+- **CI** (`.github/workflows/ci-cd.yml`): en cada push y pull request a `main` instala dependencias (`npm ci`) y hace el build de producción. Si falla, el PR queda marcado en rojo.
+- **CD**: en cada push a `main`, si pasa el build, despliega a Vercel en producción. Necesita estos secretos en GitHub (*Settings > Secrets and variables > Actions*):
+  - `VERCEL_TOKEN`: se crea en vercel.com > Account Settings > Tokens.
+  - `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID`: aparecen en `.vercel/project.json` después de correr `npx vercel link` en esta carpeta.
+
+  Si no están los secretos, el job de despliegue se omite. En ese caso puedes usar la integración Git de Vercel (importar el repositorio en Vercel), que despliega sola en cada push. No uses las dos a la vez o cada push se desplegará dos veces.
+- `vercel.json` redirige todas las rutas a `index.html`, para que recargar `/home` o abrir un enlace directo no dé 404.
+- Antes de desplegar, cambia `apiUrl` en `src/environments/environment.ts` por la URL **https** del backend publicado.
+
 ## Estructura
 
 ```
