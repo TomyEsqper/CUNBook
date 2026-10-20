@@ -134,10 +134,18 @@ export function toReservation(dto: ApiReservation): Reservation {
     horaInicio: dto.horaInicio,
     horaFin: dto.horaFin,
     estado: vencida ? 'Completada' : dto.estado,
-    fechaCreacion: dto.fechaCreacion,
+    fechaCreacion: asUtcTimestamp(dto.fechaCreacion),
     space: { id: dto.spaceId, nombre: dto.nombreEspacio, ubicacion: dto.ubicacionEspacio },
     user: { id: dto.userId, nombre: dto.nombreUsuario },
   };
+}
+
+/** El API guarda DateTime sin zona (hora UTC de Render). Sin la Z, el navegador la muestra como hora local. */
+function asUtcTimestamp(value: string): string {
+  if (!value || /(?:z|[+-]\d{2}:?\d{2})$/i.test(value)) {
+    return value;
+  }
+  return `${value}Z`;
 }
 
 /** Usuario parcial a partir del login, por si falla la consulta del perfil completo. */

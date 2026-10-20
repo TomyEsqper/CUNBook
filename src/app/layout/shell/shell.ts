@@ -32,14 +32,12 @@ const SIDE_NAV: NavItem[] = [
   { label: 'Mi perfil', icon: 'person_outline', link: '/profile' },
 ];
 
-/** Reportes y usuarios solo existen en el modo mock: la API aun no tiene esos endpoints. */
+/** Usuarios sigue solo en el modo simulado: la API no expone esa gestión. */
 const ADMIN_NAV: NavItem[] = [
   { label: 'Gestionar espacios', icon: 'domain', link: '/admin/spaces', roles: ADMIN_ROLES },
+  { label: 'Reportes', icon: 'insights', link: '/admin/reports', roles: ADMIN_ROLES },
   ...(environment.useMocks
-    ? [
-        { label: 'Reportes', icon: 'insights', link: '/admin/reports', roles: ADMIN_ROLES },
-        { label: 'Usuarios', icon: 'group', link: '/admin/users', roles: ADMIN_ROLES },
-      ]
+    ? [{ label: 'Usuarios', icon: 'group', link: '/admin/users', roles: ADMIN_ROLES }]
     : []),
 ];
 

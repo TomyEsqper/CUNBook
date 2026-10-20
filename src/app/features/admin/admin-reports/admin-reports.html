@@ -78,6 +78,8 @@
             </mat-card-content>
           </mat-card>
         </div>
+      } @else if (statsUnavailable()) {
+        <p class="muted empty-stats">El servidor todavía no publica las estadísticas.</p>
       } @else if (!loading()) {
         <p class="muted empty-stats">No se pudieron cargar las estadísticas.</p>
       }

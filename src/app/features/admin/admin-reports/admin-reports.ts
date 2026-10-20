@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -45,6 +46,7 @@ export class AdminReports implements OnInit {
   private readonly dialog = inject(MatDialog);
 
   protected readonly stats = signal<DashboardStats | null>(null);
+  protected readonly statsUnavailable = signal(false);
   protected readonly reservations = signal<Reservation[]>([]);
   protected readonly loading = signal(true);
   protected readonly search = signal('');
@@ -84,13 +86,18 @@ export class AdminReports implements OnInit {
         this.loading.set(false);
       }
     };
+    this.statsUnavailable.set(false);
     this.reportService.summary().subscribe({
       next: (stats) => {
         this.stats.set(stats);
         done();
       },
       error: (err) => {
-        this.notify.fromError(err);
+        if (err instanceof HttpErrorResponse && err.status === 404) {
+          this.statsUnavailable.set(true);
+        } else {
+          this.notify.fromError(err);
+        }
         done();
       },
     });
