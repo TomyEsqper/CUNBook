@@ -43,14 +43,14 @@ export class AuthService {
     return request$.pipe(tap((res) => this.setSession(res)));
   }
 
-  /** El backend registra siempre como Estudiante y no devuelve token, asi que se inicia sesion despues. */
+  /** El registro no devuelve token, asi que se inicia sesion despues. */
   register(req: RegisterRequest): Observable<AuthResponse> {
     if (environment.useMocks) {
       return this.mock.run(() => this.mock.register(req)).pipe(tap((res) => this.setSession(res)));
     }
-    const { nombre, email, password, telefono, facultad } = req;
+    const { nombre, email, password, telefono, facultad, rol } = req;
     return this.http
-      .post<User>(`${this.url}/register`, { nombre, email, password, telefono, facultad })
+      .post<User>(`${this.url}/register`, { nombre, email, password, telefono, facultad, rol })
       .pipe(switchMap(() => this.login({ email, password })));
   }
 

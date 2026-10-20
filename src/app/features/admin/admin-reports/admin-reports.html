@@ -88,6 +88,9 @@
     <mat-tab label="Reservas activas ({{ activas().length }})">
       <mat-card appearance="outlined" class="tab-card">
         <mat-card-content>
+          @if (listUnavailable()) {
+            <p class="muted">El servidor todavía no publica el listado de todas las reservas.</p>
+          }
           <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
             <mat-label>Buscar por espacio o usuario</mat-label>
             <mat-icon matPrefix>search</mat-icon>

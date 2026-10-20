@@ -47,6 +47,7 @@ export class AdminReports implements OnInit {
 
   protected readonly stats = signal<DashboardStats | null>(null);
   protected readonly statsUnavailable = signal(false);
+  protected readonly listUnavailable = signal(false);
   protected readonly reservations = signal<Reservation[]>([]);
   protected readonly loading = signal(true);
   protected readonly search = signal('');
@@ -87,6 +88,7 @@ export class AdminReports implements OnInit {
       }
     };
     this.statsUnavailable.set(false);
+    this.listUnavailable.set(false);
     this.reportService.summary().subscribe({
       next: (stats) => {
         this.stats.set(stats);
@@ -107,7 +109,11 @@ export class AdminReports implements OnInit {
         done();
       },
       error: (err) => {
-        this.notify.fromError(err);
+        if (err instanceof HttpErrorResponse && (err.status === 404 || err.status === 501)) {
+          this.listUnavailable.set(true);
+        } else {
+          this.notify.fromError(err);
+        }
         done();
       },
     });

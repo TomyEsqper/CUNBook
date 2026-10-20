@@ -9,7 +9,6 @@ import {
 } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
-import { environment } from '../../../../environments/environment';
 import { getErrorMessage } from '../../../core/models/api-error';
 import { Rol } from '../../../core/models/user';
 import { AuthService } from '../../../core/services/auth';
@@ -38,8 +37,7 @@ export class Register {
   private readonly notify = inject(NotifyService);
   private readonly fb = inject(FormBuilder);
 
-  /** La API registra a todos como Estudiante; el rol solo se elige en el modo mock. */
-  protected readonly canChooseRole = environment.useMocks;
+  protected readonly canChooseRole = true;
   protected readonly loading = signal(false);
   protected readonly slow = slowRequest(this.loading);
   protected readonly error = signal<string | null>(null);
@@ -75,8 +73,14 @@ export class Register {
     this.loading.set(true);
     this.error.set(null);
     this.auth.register(data).subscribe({
-      next: () => {
-        this.notify.success('Cuenta creada correctamente.');
+      next: (res) => {
+        if (data.rol === 'Docente' && res.user.rol !== 'Docente') {
+          this.notify.error(
+            'La cuenta quedó como estudiante. El servidor todavía no guarda el rol docente.',
+          );
+        } else {
+          this.notify.success('Cuenta creada correctamente.');
+        }
         this.router.navigate(['/home']);
       },
       error: (err) => {
