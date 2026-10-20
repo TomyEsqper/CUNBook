@@ -3,7 +3,7 @@ import { defer, delay, Observable, of } from 'rxjs';
 import { createSeed, MockState, MockUser } from '../mocks/mock-data';
 import { apiError } from '../models/api-error';
 import { AppNotification, TipoNotificacion } from '../models/notification';
-import { ReportSummary } from '../models/report';
+import { DashboardStats } from '../models/report';
 import { MAX_RESERVAS_ACTIVAS, Reservation, ReservationRequest } from '../models/reservation';
 import { OccupiedSlot, Space, SpaceFilter, SpaceRequest } from '../models/space';
 import {
@@ -254,55 +254,33 @@ export class MockDb {
 
   // ---------- Reportes ----------
 
-  report(): ReportSummary {
+  report(): DashboardStats {
     this.refreshStates();
     const all = this.state.reservations;
-    const vigentes = all.filter((r) => r.estado !== 'Cancelada');
-    const hours = (r: Reservation) => (timeToMinutes(r.horaFin) - timeToMinutes(r.horaInicio)) / 60;
-    // Horas de funcionamiento de un espacio en una semana, como base de la tasa de ocupacion.
-    const weeklyHours = (spaceId: number) =>
-      this.state.horarios
-        .filter((h) => h.spaceId === spaceId && h.estaDisponible)
-        .reduce((sum, h) => sum + (timeToMinutes(h.horaFin) - timeToMinutes(h.horaInicio)) / 60, 0);
-
-    const espacios = this.state.spaces
-      .map((s) => {
-        const own = vigentes.filter((r) => r.spaceId === s.id);
-        const horasReservadas = own.reduce((sum, r) => sum + hours(r), 0);
-        const base = weeklyHours(s.id) * 2;
-        return {
-          spaceId: s.id,
-          nombre: s.nombre,
-          tipo: s.tipo,
-          totalReservas: own.length,
-          horasReservadas,
-          ocupacion: base ? Math.min(100, Math.round((horasReservadas / base) * 100)) : 0,
-        };
-      })
-      .sort((a, b) => b.totalReservas - a.totalReservas);
-
-    const demand = new Map<string, number>();
-    for (const r of vigentes) {
-      for (let t = timeToMinutes(r.horaInicio); t < timeToMinutes(r.horaFin); t += 60) {
-        const hora = `${String(Math.floor(t / 60)).padStart(2, '0')}:00`;
-        demand.set(hora, (demand.get(hora) ?? 0) + 1);
-      }
+    const porEspacio = new Map<string, number>();
+    for (const reserva of all) {
+      const nombre = this.state.spaces.find((s) => s.id === reserva.spaceId)?.nombre ?? 'Sin espacio';
+      porEspacio.set(nombre, (porEspacio.get(nombre) ?? 0) + 1);
     }
-    const demandaPorHora = [...demand.entries()]
-      .map(([hora, total]) => ({ hora, total }))
-      .sort((a, b) => a.hora.localeCompare(b.hora));
+    const reservasPorEspacio = [...porEspacio.entries()]
+      .map(([nombreEspacio, cantidad]) => ({ nombreEspacio, cantidad }))
+      .sort((a, b) => b.cantidad - a.cantidad || a.nombreEspacio.localeCompare(b.nombreEspacio));
+
+    const reservasPorEstado = (['Activa', 'Cancelada', 'Completada'] as const)
+      .map((nombreEstado) => ({
+        nombreEstado,
+        cantidad: all.filter((r) => r.estado === nombreEstado).length,
+      }))
+      .filter((item) => item.cantidad > 0)
+      .sort((a, b) => b.cantidad - a.cantidad || a.nombreEstado.localeCompare(b.nombreEstado));
 
     return {
       totalReservas: all.length,
       reservasActivas: all.filter((r) => r.estado === 'Activa').length,
       reservasCanceladas: all.filter((r) => r.estado === 'Cancelada').length,
-      totalUsuarios: this.state.users.length,
-      totalEspacios: this.state.spaces.filter((s) => s.disponible).length,
-      ocupacionPromedio: espacios.length
-        ? Math.round(espacios.reduce((sum, e) => sum + e.ocupacion, 0) / espacios.length)
-        : 0,
-      espacios,
-      demandaPorHora,
+      espacioMasPopular: reservasPorEspacio[0]?.nombreEspacio ?? 'Sin reservas',
+      reservasPorEspacio,
+      reservasPorEstado,
     };
   }
 

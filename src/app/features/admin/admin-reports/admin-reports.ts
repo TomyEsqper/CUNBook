@@ -12,7 +12,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { filter, switchMap } from 'rxjs';
-import { ReportSummary } from '../../../core/models/report';
+import { DashboardStats, EstadoStat } from '../../../core/models/report';
 import { Reservation } from '../../../core/models/reservation';
 import { NotifyService } from '../../../core/services/notify';
 import { ReportService } from '../../../core/services/report';
@@ -44,7 +44,7 @@ export class AdminReports implements OnInit {
   private readonly notify = inject(NotifyService);
   private readonly dialog = inject(MatDialog);
 
-  protected readonly report = signal<ReportSummary | null>(null);
+  protected readonly stats = signal<DashboardStats | null>(null);
   protected readonly reservations = signal<Reservation[]>([]);
   protected readonly loading = signal(true);
   protected readonly search = signal('');
@@ -66,19 +66,10 @@ export class AdminReports implements OnInit {
       .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.horaInicio.localeCompare(b.horaInicio));
   });
 
-  protected readonly maxReservas = computed(() =>
-    Math.max(1, ...(this.report()?.espacios.map((e) => e.totalReservas) ?? [])),
+  protected readonly maxPorEspacio = computed(() =>
+    Math.max(1, ...(this.stats()?.reservasPorEspacio.map((e) => e.cantidad) ?? [])),
   );
-  protected readonly maxDemanda = computed(() =>
-    Math.max(1, ...(this.report()?.demandaPorHora.map((d) => d.total) ?? [])),
-  );
-  protected readonly horaPico = computed(() => {
-    const demanda = this.report()?.demandaPorHora ?? [];
-    return demanda.reduce<{ hora: string; total: number } | null>(
-      (max, d) => (!max || d.total > max.total ? d : max),
-      null,
-    );
-  });
+  protected readonly donut = computed(() => conicGradient(this.stats()?.reservasPorEstado ?? []));
 
   ngOnInit(): void {
     this.load();
@@ -86,18 +77,31 @@ export class AdminReports implements OnInit {
 
   protected load(): void {
     this.loading.set(true);
+    let pending = 2;
+    const done = (): void => {
+      pending -= 1;
+      if (pending === 0) {
+        this.loading.set(false);
+      }
+    };
     this.reportService.summary().subscribe({
-      next: (report) => this.report.set(report),
-      error: (err) => this.notify.fromError(err),
+      next: (stats) => {
+        this.stats.set(stats);
+        done();
+      },
+      error: (err) => {
+        this.notify.fromError(err);
+        done();
+      },
     });
     this.reservationService.all().subscribe({
       next: (list) => {
         this.reservations.set(list);
-        this.loading.set(false);
+        done();
       },
       error: (err) => {
-        this.loading.set(false);
         this.notify.fromError(err);
+        done();
       },
     });
   }
@@ -105,7 +109,7 @@ export class AdminReports implements OnInit {
   protected cancel(r: Reservation): void {
     const data: ConfirmDialogData = {
       title: `Cancelar reserva #${r.id}`,
-      message: `Se cancelará por motivos administrativos la reserva de ${r.user?.nombre} en ${r.space?.nombre}. El usuario será notificado por correo.`,
+      message: `Se cancelará por motivos administrativos la reserva de ${r.user?.nombre} en ${r.space?.nombre}.`,
       confirmText: 'Cancelar reserva',
       danger: true,
     };
@@ -124,4 +128,36 @@ export class AdminReports implements OnInit {
         error: (err) => this.notify.fromError(err),
       });
   }
+
+  protected estadoClass(nombre: EstadoStat['nombreEstado']): string {
+    switch (nombre) {
+      case 'Activa':
+        return 'activa';
+      case 'Cancelada':
+        return 'cancelada';
+      case 'Completada':
+        return 'completada';
+    }
+  }
+}
+
+const ESTADO_COLOR: Record<EstadoStat['nombreEstado'], string> = {
+  Activa: 'var(--mat-sys-primary)',
+  Cancelada: 'var(--mat-sys-error)',
+  Completada: 'var(--mat-sys-tertiary)',
+};
+
+function conicGradient(items: EstadoStat[]): string {
+  const total = items.reduce((sum, item) => sum + item.cantidad, 0);
+  if (!total) {
+    return 'var(--mat-sys-surface-container-high)';
+  }
+  let cursor = 0;
+  const stops = items.map((item) => {
+    const start = (cursor / total) * 100;
+    cursor += item.cantidad;
+    const end = (cursor / total) * 100;
+    return `${ESTADO_COLOR[item.nombreEstado]} ${start}% ${end}%`;
+  });
+  return `conic-gradient(${stops.join(', ')})`;
 }

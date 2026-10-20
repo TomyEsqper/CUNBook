@@ -28,7 +28,7 @@ export class Help {
     {
       question: '¿Cómo reservo un espacio?',
       answer:
-        'Entra a Espacios o al calendario, elige el espacio, la fecha y la franja horaria libre, y confirma. Recibirás un número de reserva y un correo de confirmación.',
+        'Entra a Espacios o al calendario, elige el espacio, la fecha y la franja horaria libre, y confirma. Recibirás un número de reserva y un correo con un archivo reserva.ics para Google Calendar, Outlook o Apple Calendar.',
     },
     {
       question: '¿Puedo modificar o cancelar una reserva?',
@@ -44,9 +44,9 @@ export class Help {
       answer: `Máximo ${MAX_HORAS_RESERVA} horas, en bloques de 30 minutos, dentro del horario de funcionamiento del espacio.`,
     },
     {
-      question: '¿Recibiré recordatorios?',
+      question: '¿Recibiré un correo al reservar?',
       answer:
-        'Sí. Te enviamos la confirmación al reservar, un recordatorio 24 horas antes y un aviso si la reserva se cancela.',
+        'Sí, al crear la reserva. El correo trae los datos y un archivo reserva.ics para agregarla a tu calendario. Si el correo no llega, la reserva igual queda creada: revísala en Mis reservas. Modificar o cancelar no envía otro correo.',
     },
     {
       question: '¿Por qué no puedo reservar en cierto horario?',

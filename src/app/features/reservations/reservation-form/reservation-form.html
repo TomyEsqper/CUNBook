@@ -5,7 +5,11 @@
     <div>
       <h1>{{ isEdit() ? 'Modificar reserva #' + (reservation()?.id ?? '') : 'Nueva reserva' }}</h1>
       <p>
-        {{ isEdit() ? 'Cambia la fecha u hora de tu reserva.' : 'Selecciona el espacio, la fecha y la franja horaria.' }}
+        {{
+          isEdit()
+            ? 'Cambia la fecha u hora de tu reserva.'
+            : 'Selecciona el espacio, la fecha y la franja horaria. Al confirmar, te enviaremos un correo con un archivo para tu calendario.'
+        }}
       </p>
     </div>
   </div>

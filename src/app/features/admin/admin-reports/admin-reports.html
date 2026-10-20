@@ -2,7 +2,7 @@
   <div class="page-header">
     <div>
       <h1>Reportes y estadísticas</h1>
-      <p>Uso de los espacios, franjas de mayor demanda y reservas activas.</p>
+      <p>Reservas por espacio, por estado y reservas activas.</p>
     </div>
     <button mat-stroked-button (click)="load()">
       <mat-icon>refresh</mat-icon>
@@ -16,7 +16,7 @@
 
   <mat-tab-group animationDuration="150ms">
     <mat-tab label="Estadísticas">
-      @if (report(); as r) {
+      @if (stats(); as r) {
         <div class="kpis">
           <mat-card appearance="outlined" class="kpi">
             <mat-icon>event</mat-icon>
@@ -31,78 +31,55 @@
             <div><strong>{{ r.reservasCanceladas }}</strong><span>Canceladas</span></div>
           </mat-card>
           <mat-card appearance="outlined" class="kpi">
-            <mat-icon>percent</mat-icon>
-            <div><strong>{{ r.ocupacionPromedio }}%</strong><span>Ocupación promedio</span></div>
-          </mat-card>
-          <mat-card appearance="outlined" class="kpi">
-            <mat-icon>schedule</mat-icon>
-            <div><strong>{{ horaPico()?.hora ?? '-' }}</strong><span>Hora pico</span></div>
-          </mat-card>
-          <mat-card appearance="outlined" class="kpi">
-            <mat-icon>group</mat-icon>
-            <div><strong>{{ r.totalUsuarios }}</strong><span>Usuarios</span></div>
+            <mat-icon>star</mat-icon>
+            <div><strong class="kpi-name">{{ r.espacioMasPopular }}</strong><span>Espacio más popular</span></div>
           </mat-card>
         </div>
 
         <div class="charts">
           <mat-card appearance="outlined">
-            <mat-card-header><mat-card-title>Espacios más utilizados</mat-card-title></mat-card-header>
+            <mat-card-header><mat-card-title>Reservas por espacio</mat-card-title></mat-card-header>
             <mat-card-content>
-              @for (e of r.espacios; track e.spaceId) {
-                <div class="bar-row">
-                  <span class="bar-label" [matTooltip]="e.tipo">{{ e.nombre }}</span>
-                  <div class="bar-track">
-                    <div class="bar" [style.width.%]="(e.totalReservas / maxReservas()) * 100"></div>
+              @if (r.reservasPorEspacio.length) {
+                @for (e of r.reservasPorEspacio; track e.nombreEspacio) {
+                  <div class="bar-row">
+                    <span class="bar-label" [matTooltip]="e.nombreEspacio">{{ e.nombreEspacio }}</span>
+                    <div class="bar-track">
+                      <div class="bar" [style.width.%]="(e.cantidad / maxPorEspacio()) * 100"></div>
+                    </div>
+                    <span class="bar-value">{{ e.cantidad }}</span>
                   </div>
-                  <span class="bar-value">{{ e.totalReservas }}</span>
-                </div>
+                }
+              } @else {
+                <p class="muted">Aún no hay reservas.</p>
               }
             </mat-card-content>
           </mat-card>
 
           <mat-card appearance="outlined">
-            <mat-card-header><mat-card-title>Franjas horarias de mayor demanda</mat-card-title></mat-card-header>
+            <mat-card-header><mat-card-title>Reservas por estado</mat-card-title></mat-card-header>
             <mat-card-content>
-              @if (r.demandaPorHora.length) {
-                <div class="columns">
-                  @for (d of r.demandaPorHora; track d.hora) {
-                    <div class="column" [matTooltip]="d.total + ' reservas'">
-                      <div class="column-bar" [style.height.%]="(d.total / maxDemanda()) * 100"></div>
-                      <span>{{ d.hora.slice(0, 2) }}</span>
-                    </div>
-                  }
+              @if (r.reservasPorEstado.length) {
+                <div class="donut-wrap">
+                  <div class="donut" [style.background]="donut()"></div>
+                  <ul class="legend">
+                    @for (e of r.reservasPorEstado; track e.nombreEstado) {
+                      <li>
+                        <span [class]="'swatch ' + estadoClass(e.nombreEstado)"></span>
+                        {{ e.nombreEstado }}
+                        <strong>{{ e.cantidad }}</strong>
+                      </li>
+                    }
+                  </ul>
                 </div>
               } @else {
-                <p class="muted">Aún no hay datos.</p>
+                <p class="muted">Aún no hay reservas.</p>
               }
             </mat-card-content>
           </mat-card>
-
-          <mat-card appearance="outlined" class="wide">
-            <mat-card-header><mat-card-title>Tasa de ocupación por espacio</mat-card-title></mat-card-header>
-            <mat-card-content>
-              <table class="occupancy">
-                <tr>
-                  <th>Espacio</th>
-                  <th>Reservas</th>
-                  <th>Horas reservadas</th>
-                  <th>Ocupación</th>
-                </tr>
-                @for (e of r.espacios; track e.spaceId) {
-                  <tr>
-                    <td>{{ e.nombre }}</td>
-                    <td>{{ e.totalReservas }}</td>
-                    <td>{{ e.horasReservadas }} h</td>
-                    <td class="occ">
-                      <div class="bar-track"><div class="bar" [style.width.%]="e.ocupacion"></div></div>
-                      <span>{{ e.ocupacion }}%</span>
-                    </td>
-                  </tr>
-                }
-              </table>
-            </mat-card-content>
-          </mat-card>
         </div>
+      } @else if (!loading()) {
+        <p class="muted empty-stats">No se pudieron cargar las estadísticas.</p>
       }
     </mat-tab>
 

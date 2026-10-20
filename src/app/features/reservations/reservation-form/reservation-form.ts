@@ -355,8 +355,8 @@ export class ReservationForm implements OnInit {
       next: (r) => {
         this.notify.success(
           id
-            ? `Reserva #${r.id} modificada. Te enviamos la confirmación por correo.`
-            : `Reserva #${r.id} confirmada. Te enviamos la confirmación por correo.`,
+            ? `Reserva #${r.id} modificada.`
+            : `Reserva #${r.id} confirmada. Te enviamos un correo con la invitación para tu calendario.`,
         );
         this.router.navigate(['/reservations']);
       },

@@ -95,7 +95,7 @@ export class MyReservations implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.notify.success(`Reserva #${r.id} cancelada. Te enviamos la confirmación por correo.`);
+          this.notify.success(`Reserva #${r.id} cancelada.`);
           this.load();
         },
         error: (err) => this.notify.fromError(err),
