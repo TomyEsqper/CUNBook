@@ -3,7 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, map, Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiAuthResponse, notAvailable, userFromAuth } from '../api/backend';
+import { ApiAuthResponse, userFromAuth } from '../api/backend';
 import {
   ADMIN_ROLES,
   AuthResponse,
@@ -54,10 +54,27 @@ export class AuthService {
       .pipe(switchMap(() => this.login({ email, password })));
   }
 
+  /** El enlace solo se muestra si el API confirma que el SMTP puede enviar el correo. */
+  passwordResetAvailable(): Observable<boolean> {
+    if (environment.useMocks) {
+      return of(true);
+    }
+    return this.http.get<{ disponible: boolean }>(`${this.url}/password-reset-available`).pipe(
+      map((res) => res.disponible),
+      catchError(() => of(false)),
+    );
+  }
+
   forgotPassword(email: string): Observable<void> {
     return environment.useMocks
       ? this.mock.run(() => this.mock.forgotPassword(email))
-      : notAvailable('La recuperación de contraseña');
+      : this.http.post(`${this.url}/forgot-password`, { email }).pipe(map(() => undefined));
+  }
+
+  resetPassword(token: string, password: string): Observable<void> {
+    return environment.useMocks
+      ? this.mock.run(() => this.mock.resetPassword(token, password))
+      : this.http.post(`${this.url}/reset-password`, { token, password }).pipe(map(() => undefined));
   }
 
   logout(): void {

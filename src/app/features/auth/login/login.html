@@ -38,7 +38,9 @@
         @if (invalid('password')) {
           <span class="field-error">La contraseña es obligatoria.</span>
         }
-        <button type="button" class="forgot" (click)="recoverMode.set(true)">¿Olvidaste tu contraseña?</button>
+        @if (recoverAvailable()) {
+          <button type="button" class="forgot" (click)="recoverMode.set(true)">¿Olvidaste tu contraseña?</button>
+        }
       </div>
 
       @if (error()) {

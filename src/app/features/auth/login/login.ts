@@ -1,4 +1,4 @@
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, inject, input, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -21,7 +21,7 @@ const API_DEMO_ACCOUNTS: DemoAccount[] = [
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly notify = inject(NotifyService);
@@ -36,6 +36,7 @@ export class Login {
   protected readonly error = signal<string | null>(null);
   protected readonly hidePassword = signal(true);
   protected readonly recoverMode = signal(false);
+  protected readonly recoverAvailable = signal(environment.useMocks);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -45,6 +46,10 @@ export class Login {
   protected readonly recoverForm = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
   });
+
+  ngOnInit(): void {
+    this.auth.passwordResetAvailable().subscribe((available) => this.recoverAvailable.set(available));
+  }
 
   protected invalid(name: 'email' | 'password'): boolean {
     const control = this.form.controls[name];

@@ -28,6 +28,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
       },
       {
+        path: 'restablecer-contrasena',
+        title: 'Nueva contraseña | RESERVAS CUN',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+      },
+      {
         path: 'ayuda',
         title: 'Ayuda | RESERVAS CUN',
         loadComponent: () => import('./features/help/help').then((m) => m.Help),

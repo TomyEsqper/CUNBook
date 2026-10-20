@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiReservation, notAvailable, toReservation } from '../api/backend';
+import { ApiReservation, toReservation } from '../api/backend';
 import { Reservation, ReservationRequest } from '../models/reservation';
 import { toApiTime } from '../utils/date-utils';
 import { AuthService } from './auth';
@@ -56,18 +56,22 @@ export class ReservationService {
       : this.http.delete<ApiReservation>(`${this.url}/${id}`).pipe(map(() => undefined));
   }
 
-  /** Todas las reservas del sistema (solo administradores). */
+  /** GET /api/admin/reservations. Solo administradores. */
   all(): Observable<Reservation[]> {
     return environment.useMocks
       ? this.mock.run(() => this.mock.listAllReservations())
-      : notAvailable('El listado de todas las reservas');
+      : this.http
+          .get<ApiReservation[]>(`${environment.apiUrl}/admin/reservations`)
+          .pipe(map((list) => list.map(toReservation)));
   }
 
-  /** Cancelacion administrativa de cualquier reserva. */
+  /** DELETE /api/admin/reservations/{id}. Solo administradores. */
   adminCancel(id: number): Observable<void> {
     return environment.useMocks
       ? this.mock.run(() => this.mock.cancelReservation(this.auth.currentUserId(), id))
-      : notAvailable('La cancelación administrativa');
+      : this.http
+          .delete<ApiReservation>(`${environment.apiUrl}/admin/reservations/${id}`)
+          .pipe(map(() => undefined));
   }
 
   private toBody(req: ReservationRequest): ReservationRequest {

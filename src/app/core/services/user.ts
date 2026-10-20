@@ -2,7 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { notAvailable } from '../api/backend';
 import { Rol, UpdateProfileRequest, User } from '../models/user';
 import { AuthService } from './auth';
 import { MockDb } from './mock-db';
@@ -29,15 +28,17 @@ export class UserService {
     return request$.pipe(tap((user) => this.auth.updateStoredUser(user)));
   }
 
+  /** GET /api/admin/users. Solo administradores. No incluye contraseñas. */
   list(): Observable<User[]> {
     return environment.useMocks
       ? this.mock.run(() => this.mock.listUsers())
-      : notAvailable('La gestión de usuarios');
+      : this.http.get<User[]>(`${environment.apiUrl}/admin/users`);
   }
 
+  /** PUT /api/admin/users/{id}/rol. Solo administradores. */
   updateRole(id: number, rol: Rol): Observable<User> {
     return environment.useMocks
       ? this.mock.run(() => this.mock.updateRole(id, rol))
-      : notAvailable('El cambio de rol');
+      : this.http.put<User>(`${environment.apiUrl}/admin/users/${id}/rol`, { rol });
   }
 }

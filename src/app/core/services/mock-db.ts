@@ -85,6 +85,12 @@ export class MockDb {
 
   forgotPassword(_email: string): void {}
 
+  resetPassword(token: string, _password: string): void {
+    if (!token.trim()) {
+      throw apiError(400, 'El enlace de restablecimiento no es válido o ya expiró.');
+    }
+  }
+
   userIdFromToken(token: string | null): number {
     const id = Number(token?.split('.')[1]);
     if (!id || !this.state.users.some((u) => u.id === id)) {
