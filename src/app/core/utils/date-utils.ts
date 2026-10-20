@@ -1,5 +1,26 @@
 import { DiaSemana, DIAS_SEMANA } from '../models/space';
 
+/** Hora del campus. El servidor valida las reservas con esta zona, no con UTC. */
+const CAMPUS_TIME_ZONE = 'America/Bogota';
+
+/** Ahora en America/Bogota, expresado como Date con esos componentes de calendario. */
+export function campusNow(instant = new Date()): Date {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: CAMPUS_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(instant);
+  const pick = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? '0');
+  const hour = pick('hour') % 24;
+  return new Date(pick('year'), pick('month') - 1, pick('day'), hour, pick('minute'), pick('second'));
+}
+
 /** Date -> "yyyy-MM-dd" en hora local. */
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();

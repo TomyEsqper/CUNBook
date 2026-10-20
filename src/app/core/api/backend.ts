@@ -3,7 +3,7 @@ import { apiError } from '../models/api-error';
 import { EstadoReserva, Reservation } from '../models/reservation';
 import { DiaSemana, Space, SpaceHorario, SpaceRequest, TipoEspacio } from '../models/space';
 import { Rol, User } from '../models/user';
-import { combineDateTime } from '../utils/date-utils';
+import { campusNow, combineDateTime } from '../utils/date-utils';
 
 /**
  * Contrato de la API ASP.NET (ReservaEspacios.Api) y su traduccion a los modelos del front.
@@ -125,7 +125,7 @@ export function toApiHorario(spaceId: number, h: SpaceRequest['horarios'][number
 
 /** El backend no cierra las reservas vencidas: una "Activa" que ya termino se muestra como "Completada". */
 export function toReservation(dto: ApiReservation): Reservation {
-  const vencida = dto.estado === 'Activa' && combineDateTime(dto.fecha, dto.horaFin) < new Date();
+  const vencida = dto.estado === 'Activa' && combineDateTime(dto.fecha, dto.horaFin) < campusNow();
   return {
     id: dto.id,
     userId: dto.userId,

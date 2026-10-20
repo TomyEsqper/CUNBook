@@ -18,6 +18,7 @@ import { NotifyService } from '../../../core/services/notify';
 import { ReservationService } from '../../../core/services/reservation';
 import { SpaceService } from '../../../core/services/space';
 import {
+  campusNow,
   combineDateTime,
   dayOfWeek,
   fromIsoDate,
@@ -74,11 +75,14 @@ export class ReservationForm implements OnInit {
   protected readonly loading = signal(false);
   protected readonly serverError = signal<string | null>(null);
 
-  protected readonly minDate = new Date();
+  protected readonly minDate = computed(() => {
+    const now = this.now();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  });
   protected readonly maxHoras = MAX_HORAS_RESERVA;
   protected readonly shortTime = shortTime;
   /** Se refresca cada minuto para que las horas ya pasadas desaparezcan de las opciones. */
-  private readonly now = signal(new Date());
+  private readonly now = signal(campusNow());
   protected readonly spaceIcon = spaceIcon;
 
   protected readonly form = inject(FormBuilder).group({
@@ -173,7 +177,7 @@ export class ReservationForm implements OnInit {
     if (timeToMinutes(horaFin) - timeToMinutes(horaInicio) > MAX_MIN) {
       warnings.push(`Una reserva puede durar máximo ${MAX_HORAS_RESERVA} horas.`);
     }
-    if (combineDateTime(iso, horaInicio) <= new Date()) {
+    if (combineDateTime(iso, horaInicio) <= this.now()) {
       warnings.push('No se puede reservar una fecha u hora que ya pasó.');
     }
     if (!space.disponible) {
@@ -222,7 +226,7 @@ export class ReservationForm implements OnInit {
   protected readonly canEdit = computed(() => !this.isEdit() || this.reservation()?.estado === 'Activa');
 
   constructor() {
-    const timer = setInterval(() => this.now.set(new Date()), 60_000);
+    const timer = setInterval(() => this.now.set(campusNow()), 60_000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
 
     // Al cambiar espacio, fecha o inicio, se limpian las horas que dejaron de ser validas.

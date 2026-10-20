@@ -16,6 +16,7 @@ import { NotifyService } from '../../../core/services/notify';
 import { SpaceService } from '../../../core/services/space';
 import {
   addDays,
+  campusNow,
   combineDateTime,
   dayOfWeek,
   minutesToTime,
@@ -84,7 +85,7 @@ export class Calendar {
   private readonly cells = computed(() => {
     const map = new Map<string, CellState>();
     const space = this.space();
-    const now = new Date();
+    const now = campusNow();
     for (const day of this.days()) {
       const dia = dayOfWeek(day.date);
       const horarios = space?.horarios?.filter((h) => h.diaSemana === dia && h.estaDisponible) ?? [];
@@ -163,7 +164,7 @@ export class Calendar {
   }
 
   protected isToday(day: DayColumn): boolean {
-    return day.iso === toIsoDate(new Date());
+    return day.iso === toIsoDate(campusNow());
   }
 
   protected moveWeek(weeks: number): void {
