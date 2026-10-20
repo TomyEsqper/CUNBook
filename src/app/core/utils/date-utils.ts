@@ -1,6 +1,21 @@
 import { DiaSemana, DIAS_SEMANA } from '../models/space';
 
-/** Hora del campus. El servidor valida las reservas con esta zona, no con UTC. */
+/**
+ * Reloj con el que el API desplegado decide si una hora ya pasó.
+ * Render no tiene zona horaria configurada, así que DateTime.Now es UTC.
+ */
+export function apiNow(instant = new Date()): Date {
+  return new Date(
+    instant.getUTCFullYear(),
+    instant.getUTCMonth(),
+    instant.getUTCDate(),
+    instant.getUTCHours(),
+    instant.getUTCMinutes(),
+    instant.getUTCSeconds(),
+  );
+}
+
+/** Hora de Colombia, para mostrar si una reserva ya terminó en el campus. */
 const CAMPUS_TIME_ZONE = 'America/Bogota';
 
 /** Ahora en America/Bogota, expresado como Date con esos componentes de calendario. */

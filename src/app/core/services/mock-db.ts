@@ -15,7 +15,7 @@ import {
   User,
 } from '../models/user';
 import {
-  campusNow,
+  apiNow,
   combineDateTime,
   dayOfWeek,
   fromIsoDate,
@@ -297,7 +297,7 @@ export class MockDb {
     if (timeToMinutes(req.horaFin) <= timeToMinutes(req.horaInicio)) {
       throw apiError(400, 'La hora de fin debe ser mayor que la hora de inicio.');
     }
-    if (combineDateTime(req.fecha, req.horaInicio) <= campusNow()) {
+    if (combineDateTime(req.fecha, req.horaInicio) <= apiNow()) {
       throw apiError(400, 'No se puede reservar una fecha u hora que ya pasó.');
     }
     const space = this.state.spaces.find((s) => s.id === req.spaceId);

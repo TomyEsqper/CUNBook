@@ -18,7 +18,7 @@ import { NotifyService } from '../../../core/services/notify';
 import { ReservationService } from '../../../core/services/reservation';
 import { SpaceService } from '../../../core/services/space';
 import {
-  campusNow,
+  apiNow,
   combineDateTime,
   dayOfWeek,
   fromIsoDate,
@@ -82,7 +82,7 @@ export class ReservationForm implements OnInit {
   protected readonly maxHoras = MAX_HORAS_RESERVA;
   protected readonly shortTime = shortTime;
   /** Se refresca cada minuto para que las horas ya pasadas desaparezcan de las opciones. */
-  private readonly now = signal(campusNow());
+  private readonly now = signal(apiNow());
   protected readonly spaceIcon = spaceIcon;
 
   protected readonly form = inject(FormBuilder).group({
@@ -102,8 +102,8 @@ export class ReservationForm implements OnInit {
   );
 
   /**
-   * Ventana reservable del dia elegido en minutos: horario del espacio y, si es hoy,
-   * desde la siguiente media hora despues de la hora actual.
+   * Ventana reservable del dia elegido: horario del espacio y, si es el dia del API,
+   * desde la siguiente media hora despues de la hora UTC del servidor.
    */
   private readonly window = computed(() => {
     const fecha = this.value().fecha;
@@ -226,7 +226,7 @@ export class ReservationForm implements OnInit {
   protected readonly canEdit = computed(() => !this.isEdit() || this.reservation()?.estado === 'Activa');
 
   constructor() {
-    const timer = setInterval(() => this.now.set(campusNow()), 60_000);
+    const timer = setInterval(() => this.now.set(apiNow()), 60_000);
     inject(DestroyRef).onDestroy(() => clearInterval(timer));
 
     // Al cambiar espacio, fecha o inicio, se limpian las horas que dejaron de ser validas.
